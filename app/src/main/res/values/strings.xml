@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">SecretDiary</string>
+    <string name="Home">Home</string>
+    <string name="Friend">Friend</string>
+    <string name="Setting">Setting</string>
+    <string name="Join">Join</string>
+</resources>
