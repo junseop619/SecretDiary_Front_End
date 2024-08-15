@@ -3,5 +3,6 @@
     <string name="Home">Home</string>
     <string name="Friend">Friend</string>
     <string name="Setting">Setting</string>
+    <string name="NoticeDetail">NoticeDetail</string>
     <string name="Join">Join</string>
 </resources>

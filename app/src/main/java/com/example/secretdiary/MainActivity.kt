@@ -17,7 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.secretdiary.ui.home.HomeViewModel
-import com.example.secretdiary.ui.home.MainScreen
+//import com.example.secretdiary.ui.home.MainScreen
 import com.example.secretdiary.ui.security.LoginScreen
 import com.example.secretdiary.ui.security.SecurityScreen
 import com.example.secretdiary.ui.security.SecurityViewModel
@@ -32,13 +32,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             SecretDiaryTheme {
                 SecurityScreen()
-                /*
-                val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "login") {
-                    composable("login") { LoginScreen(navController, viewModel = SecurityViewModel()) }
-                    composable("main") { MainScreen(viewModel = HomeViewModel()) }
-                }*/
-                //LoginScreen(viewModel = SecurityViewModel())
             }
         }
     }

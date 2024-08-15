@@ -34,8 +34,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.secretdiary.di.room.UserDatabase
 import com.example.secretdiary.di.room.repository.OfflineUsersRepository
+import com.example.secretdiary.ui.components.ComponentViewModel
+import com.example.secretdiary.ui.components.MainScreen
 import com.example.secretdiary.ui.home.HomeViewModel
-import com.example.secretdiary.ui.home.MainScreen
+//import com.example.secretdiary.ui.home.MainScreen
 import com.example.secretdiary.ui.theme.SecretDiaryTheme
 
 enum class SecurityNav(val title: String){
@@ -84,7 +86,8 @@ fun SecurityScreen(
 
             composable(route = SecurityNav.Main.name){
                 MainScreen(
-                    viewModel = HomeViewModel()
+                    //viewModel = HomeViewModel()
+                    viewModel = ComponentViewModel()
                 )
             }
         }

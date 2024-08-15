@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -83,93 +84,134 @@ import com.example.secretdiary.di.data.DataProvider
 import com.example.secretdiary.di.data.Puppy
 import com.example.secretdiary.di.notice.model.NoticeModel
 import com.example.secretdiary.di.notice.model.RNoticeModel
+import com.example.secretdiary.ui.components.ComponentViewModel
+import com.example.secretdiary.ui.friend.FriendScreen
 import com.example.secretdiary.ui.security.JoinScreen
 import com.example.secretdiary.ui.security.SecurityViewModel
+import com.example.secretdiary.ui.setting.SettingScreen
 import com.example.secretdiary.ui.theme.SecretDiaryTheme
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    viewModel: HomeViewModel,
+    homeViewModel: HomeViewModel,
+    componentViewModel: ComponentViewModel,
     modifier: Modifier = Modifier
 ) {
+    var showDetailNotice by remember { mutableStateOf(false) }
+    var selectedNoticeId by remember { mutableStateOf<Long?>(null) }
+
+    // searchQuery, searchResults, notices 설정 코드 생략
     var searchQuery by remember { mutableStateOf("")}
-    val searchResults by viewModel.searchResults.collectAsState()
-    val notices by viewModel.notices.collectAsState()
+    val searchResults by homeViewModel.searchResults.collectAsState()
+    val notices by homeViewModel.notices.collectAsState()
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        //verticalArrangement = Arrangement.Center,
-        //horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Home")
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            value = searchQuery,
-            singleLine = true,
-            onValueChange = {
-                searchQuery = it
-                viewModel.onSearchQueryChange(searchQuery)
-            },
-            label = { Text("Search Notices")}
+    if (showDetailNotice && selectedNoticeId != null) {
+        NoticeDetailScreen(
+            navController = navController,
+            noticeId = selectedNoticeId,
+            viewModel = homeViewModel
         )
+    } else {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            Text(text = "Home")
 
-        val itemsToShow = if (searchQuery.isNotEmpty()) searchResults else notices
-
-        //search test
-        LazyColumn(contentPadding = PaddingValues(16.dp, 8.dp)) {
-            items(
-                items = searchResults,
-                //items = itemsToShow,
-                itemContent = { notice ->
-                    NoticeListItem(notice = notice, navController = navController)
-                }
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                value = searchQuery,
+                singleLine = true,
+                onValueChange = {
+                    searchQuery = it
+                    homeViewModel.onSearchQueryChange(searchQuery)
+                },
+                label = { Text("Search Notices")}
             )
 
+            val itemsToShow = if (searchQuery.isNotEmpty()) searchResults else notices
+
+
+            fun onNoticeClick(noticeId: Long) {
+                // 예시: 공지사항 세부 정보 화면으로 이동
+                navController.navigate("home/$noticeId")
+            }
+
+
+            //search test
+            LazyColumn(contentPadding = PaddingValues(16.dp, 8.dp)) {
+                items(
+                    items = searchResults,
+                    //items = itemsToShow,
+                    itemContent = { notice ->
+                        NoticeListItem(notice = notice, navController = navController) {
+                            onNoticeClick(notice.noticeId)
+                        }
+                    }
+                )
+
+            }
+
+            Text(text = "Home2")
+
+            // SearchBar, LazyColumn 등의 기존 Home 화면 요소 생략
+
+            // NoticeListItem 클릭 시 showDetailNotice를 true로 변경
+            RecyclerViewNoticeContent(viewModel = homeViewModel, navController = navController) { noticeId ->
+                selectedNoticeId = noticeId
+                showDetailNotice = true
+            }
         }
-
-        Text(text = "Home2")
-        //RecyclerViewNoticeContent(viewModel = HomeViewModel())
-        RecyclerViewNoticeContent(viewModel = viewModel, navController = navController)
-
     }
-
 }
 
 
+
 @Composable
-fun RecyclerViewNoticeContent(viewModel: HomeViewModel, navController: NavHostController){
+fun RecyclerViewNoticeContent(
+    viewModel: HomeViewModel,
+    navController: NavHostController,
+    onNoticeClick: (Long) -> Unit
+) {
     val notices by viewModel.notices.collectAsState()
 
     LazyColumn(contentPadding = PaddingValues(16.dp, 8.dp)) {
         items(
             items = notices,
             itemContent = { notice ->
-                NoticeListItem(notice = notice, navController = navController)
+                NoticeListItem(notice = notice, navController = navController) {
+                    //onNoticeClick(notice.noticeId)
+                    navController.navigate("home/${notice.noticeId}")
+                }
             }
         )
     }
 }
 
+//검색 결과 및 기본 recycler outer
 @Composable
-fun NoticeListItem(notice: RNoticeModel, navController: NavHostController) {
+fun NoticeListItem(notice: RNoticeModel, navController: NavHostController, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .clickable {
-                navController.navigate("notice_detail/${notice.noticeId}")
+                onClick()
+                //navController.navigate("noticeDetail/$notice.noticeId")
             }
             .padding(8.dp)
     ) {
         NoticeImage(notice = notice)
         Column {
+            Text(text = "this is test")
             Text(text = notice.noticeTitle)
             Text(text = notice.noticeText)
         }
     }
 }
+
 
 @Composable
 fun NoticeImage(notice: RNoticeModel) {
@@ -197,9 +239,14 @@ fun NoticeImage(notice: RNoticeModel) {
 @Composable
 fun NoticeDetailScreen(
     navController: NavHostController,
-    noticeId: Long,
+    noticeId: Long?,
     viewModel: HomeViewModel
 ) {
+    if (noticeId == null) {
+        Text("Error: Notice ID is missing")
+        return
+    }
+
     val noticeFlow = viewModel.getNoticeById(noticeId)
     val notice by noticeFlow.collectAsState(initial = null)
 
@@ -211,6 +258,7 @@ fun NoticeDetailScreen(
         }
     } ?: Text("Loading...")
 }
+
 
 
 
@@ -322,170 +370,6 @@ fun AddNoticeScreen(
 }
 
 
-@Composable
-fun FriendScreen() {
-    //Text(text = "Friend")
-
-    val tabs = listOf("내 친구", "친구 추천")
-    val selectedTabIndex = remember { mutableStateOf(0) }
-    val coroutineScope = rememberCoroutineScope()
-
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        //verticalArrangement = Arrangement.Center
-    ) {
-        TabRow(
-            selectedTabIndex = selectedTabIndex.value,
-            modifier = Modifier.fillMaxWidth(),
-
-            ) {
-            tabs.forEachIndexed { index, tab ->
-                Tab(
-                    text = { Text(tab) },
-                    selected = selectedTabIndex.value == index,
-                    onClick = {
-                        coroutineScope.launch {
-                            selectedTabIndex.value = index
-                        }
-                    }
-                )
-            }
-        }
-        when (selectedTabIndex.value) {
-            0 -> TabFriend1()
-            1 -> TabFriend2()
-        }
-
-    }
-}
-
-@Composable
-fun TabFriend1() {
-    Column {
-        Text(text = "Content for Tab 1")
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            //value = searchQuery ?: "",
-            value = "",
-            singleLine = true,
-            onValueChange = {
-                val query = it.trim()
-                //viewModel.updateSearchQuery(query)
-
-            }
-        )
-        Text(text = "Content for Tab 1")
-
-    }
-}
-
-@Composable
-fun TabFriend2() {
-    Text(text = "Content for Tab 2")
-    OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        //value = searchQuery ?: "",
-        value = "",
-        singleLine = true,
-        onValueChange = {
-            val query = it.trim()
-            //viewModel.updateSearchQuery(query)
-
-        }
-    )
-    Text(text = "Content for Tab 2")
-}
-
-
-
-@Composable
-fun SettingScreen() {
-    val context = LocalContext.current
-    Column(
-        modifier = Modifier.fillMaxSize(),
-
-    ) {
-        Text(text = "Profile")
-        Row(
-
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.test),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(84.dp)
-                    .clip(RoundedCornerShape(CornerSize(16.dp)))
-            )
-
-            Column(
-
-            ) {
-                Text(text = "nickName")
-                Text(
-                    text = "text",
-                    modifier = Modifier
-                        .size(width = 80.dp, height = 100.dp) //text 영역 size
-                        .padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(1.dp))
-
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Button(
-                onClick = {
-                    //viewModel.onSignUp()
-                    //navController.popBackStack() // 회원가입 후 이전 화면으로 이동
-                    //navController.navigate(SecurityNav.Join.name)
-                },
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxWidth(0.8f)
-            ) {
-                Text("내정보 수정하기")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 검정색 긴 실선
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(Color.Black)
-        )
-
-        // 리스트 버튼들
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            items(listOf(
-                "리스트 아이템 1" to { Toast.makeText(context, "list 1", Toast.LENGTH_SHORT).show() },
-                "리스트 아이템 2" to { Toast.makeText(context, "list 2", Toast.LENGTH_SHORT).show() },
-                "리스트 아이템 3" to { Toast.makeText(context, "list 3", Toast.LENGTH_SHORT).show() }
-            )) { (item, onClick) ->
-                ListItemButton(text = item, onClick = onClick)
-                Divider(
-                    color = Color.Black,
-                    thickness = 1.dp
-                )
-            }
-        }
-
-    }
-}
 
 @Composable
 fun ListItemButton(text: String, onClick: () -> Unit) {
@@ -502,207 +386,14 @@ fun ListItemButton(text: String, onClick: () -> Unit) {
     }
 }
 
-
-
-
-sealed class BottomNavItem(
-    val title: Int, val icon: Int, val screenRoute: String
-) {
-    object Home : BottomNavItem(R.string.Home, R.drawable.ic_home, "CALENDAR")
-    object Friend : BottomNavItem(R.string.Friend, R.drawable.ic_person, "TIMELINE")
-    object Setting : BottomNavItem(R.string.Setting, R.drawable.ic_settings, "ANALYSIS")
-}
-
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MainTopAppBar(navController: NavHostController) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-
-    TopAppBar(
-        title = { Text(text = "Secret Diary") },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
-        ),
-        navigationIcon = {
-            if(currentRoute == "add_notice"){
-                IconButton(onClick = {
-                    navController.popBackStack()
-                }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_back),
-                        contentDescription = "Back"
-                    )
-                }
-            }
-        },
-        actions = {
-            when (currentRoute) {
-                BottomNavItem.Home.screenRoute -> {
-                    IconButton(onClick = {
-                        navController.navigate("add_notice")
-                    }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_home),
-                            contentDescription = "Home Action"
-                        )
-                    }
-                }
-                BottomNavItem.Friend.screenRoute -> {
-                    IconButton(onClick = { /* Friend action */ }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_person),
-                            contentDescription = "Friend Action"
-                        )
-                    }
-                }
-                BottomNavItem.Setting.screenRoute -> {
-                    IconButton(onClick = { /* Setting action */ }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_settings),
-                            contentDescription = "Setting Action"
-                        )
-                    }
-                }
-            }
-        }
-    )
-}
-
-
-
-@Composable
-fun MainScreen(viewModel: HomeViewModel) {
-    val navController = rememberNavController()
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = { MainTopAppBar(navController = navController)},
-        bottomBar = {
-            MyBottomNavigation(
-                containerColor = Color.Red,
-                contentColor = Color.White,
-                indicatorColor = Color.Green,
-                navController = navController
-            )
-        }
-    ) {
-        Box(modifier = Modifier.padding(it)) {
-            MyNavHost(
-                navController = navController,
-                startDestination = BottomNavItem.Home.screenRoute
-            )
-        }
-    }
-}
-
-@Composable
-private fun MyNavHost(
-    modifier: Modifier = Modifier,
-    navController: NavHostController,
-    startDestination: String
-) {
-    NavHost(
-        modifier = modifier,
-        navController = navController,
-        startDestination = startDestination
-    ) {
-
-        composable(BottomNavItem.Home.screenRoute){
-            HomeScreen(navController = navController, viewModel = HomeViewModel())
-        }
-
-        composable(BottomNavItem.Friend.screenRoute){
-            FriendScreen()
-        }
-
-        composable(BottomNavItem.Setting.screenRoute){
-            SettingScreen()
-        }
-
-        composable("add_notice"){
-            AddNoticeScreen(navController = navController, viewModel = HomeViewModel())
-        }
-
-        composable(
-            route = "notice_detail/{noticeId}",
-            //route = "notice_detail",
-            arguments = listOf(navArgument("noticeId") { type = NavType.LongType })
-        ) { backStackEntry ->
-            val noticeId = backStackEntry.arguments?.getLong("noticeId")
-            noticeId?.let {
-                NoticeDetailScreen(noticeId = it, viewModel = HomeViewModel(), navController = navController)
-            }
-        }
-    }
-}
-
-@Composable
-private fun MyBottomNavigation(
-    modifier: Modifier = Modifier,
-    containerColor: Color,
-    contentColor: Color,
-    indicatorColor: Color,
-    navController: NavHostController
-) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-    val items = listOf(
-        BottomNavItem.Home,
-        BottomNavItem.Friend,
-        BottomNavItem.Setting
-    )
-
-    AnimatedVisibility(
-        visible = items.map { it.screenRoute }.contains(currentRoute)
-    ) {
-        NavigationBar(
-            modifier = modifier,
-            containerColor = containerColor,
-            contentColor = contentColor,
-        ) {
-            items.forEach { item ->
-                NavigationBarItem(
-                    selected = currentRoute == item.screenRoute,
-                    label = {
-                        Text(
-                            text = stringResource(id = item.title),
-                            style = TextStyle(
-                                fontSize = 12.sp
-                            )
-                        )
-                    },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = item.icon),
-                            contentDescription = stringResource(id = item.title)
-                        )
-                    },
-                    onClick = {
-                        navController.navigate(item.screenRoute) {
-                            navController.graph.startDestinationRoute?.let {
-                                popUpTo(it) { saveState = true }
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                )
-            }
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     SecretDiaryTheme {
         // Preview에선 ViewModel을 직접 생성해서 전달
         HomeScreen(navController = rememberNavController(),
-            viewModel = HomeViewModel()
+            homeViewModel = HomeViewModel(),
+            componentViewModel = ComponentViewModel()
         )
     }
 }
