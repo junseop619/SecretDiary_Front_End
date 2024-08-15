@@ -21,7 +21,6 @@ import retrofit2.http.Query
 interface SecretDiaryAPI {
 
     //user && security
-
     @POST("security/join") //client ->db
     suspend fun joinUser(@Body userModel: UserModel) : Response<Void>
 
@@ -31,10 +30,7 @@ interface SecretDiaryAPI {
     @GET("home")
     suspend fun userInfo(@Query("userId") userId:String): Call<List<UserModel>>
 
-    /*@GET("variable/{userId}")
-    fun adminUserSearch(@Path("userId") userId: String):Call<List<UserModel>>*/
-
-    //notice
+    //단일 image notice
     @Multipart
     @POST("upload")
     suspend fun upload(
@@ -44,21 +40,9 @@ interface SecretDiaryAPI {
         @Part noticeImage: MultipartBody.Part
     ): Response<ResponseBody>
 
-
-    /*
-    @GET("findAll2")
-    fun readAll(): Call<List<NoticeModel>>
-
-     */
-
     @GET("findAll2")
     fun readAll(): Call<List<RNoticeModel>>
 
-    /*
-    @GET("search/notice")
-    suspend fun search(@Query("keyword") query: String): List<RNoticeModel>
-
-     */
 
     @GET("search/notice")
     fun search2(@Query("keyword") query: String): Call<List<RNoticeModel>>

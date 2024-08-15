@@ -2,11 +2,8 @@ package com.example.secretdiary.ui.home
 
 import android.net.Uri
 import android.util.Log
-import android.widget.ImageView
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,33 +21,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,40 +42,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import coil.compose.rememberImagePainter
-import coil.request.ImageRequest
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.example.secretdiary.R
-import com.example.secretdiary.di.data.DataProvider
-import com.example.secretdiary.di.data.Puppy
-import com.example.secretdiary.di.notice.model.NoticeModel
 import com.example.secretdiary.di.notice.model.RNoticeModel
 import com.example.secretdiary.ui.components.ComponentViewModel
-import com.example.secretdiary.ui.friend.FriendScreen
-import com.example.secretdiary.ui.security.JoinScreen
-import com.example.secretdiary.ui.security.SecurityViewModel
-import com.example.secretdiary.ui.setting.SettingScreen
 import com.example.secretdiary.ui.theme.SecretDiaryTheme
-import kotlinx.coroutines.launch
-
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.imageResource
+import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun HomeScreen(
@@ -103,7 +65,6 @@ fun HomeScreen(
     var showDetailNotice by remember { mutableStateOf(false) }
     var selectedNoticeId by remember { mutableStateOf<Long?>(null) }
 
-    // searchQuery, searchResults, notices 설정 코드 생략
     var searchQuery by remember { mutableStateOf("")}
     val searchResults by homeViewModel.searchResults.collectAsState()
     val notices by homeViewModel.notices.collectAsState()
@@ -139,7 +100,10 @@ fun HomeScreen(
             fun onNoticeClick(noticeId: Long) {
                 // 예시: 공지사항 세부 정보 화면으로 이동
                 navController.navigate("home/$noticeId")
+                Log.d("home screen", "search test route = ${noticeId}")
+
             }
+
 
 
             //search test
@@ -156,15 +120,17 @@ fun HomeScreen(
 
             }
 
-            Text(text = "Home2")
-
-            // SearchBar, LazyColumn 등의 기존 Home 화면 요소 생략
+            Divider(color = Color.Black, thickness = 1.dp)
 
             // NoticeListItem 클릭 시 showDetailNotice를 true로 변경
+            //recycler view
+
             RecyclerViewNoticeContent(viewModel = homeViewModel, navController = navController) { noticeId ->
                 selectedNoticeId = noticeId
                 showDetailNotice = true
             }
+
+
         }
     }
 }
@@ -186,11 +152,13 @@ fun RecyclerViewNoticeContent(
                 NoticeListItem(notice = notice, navController = navController) {
                     //onNoticeClick(notice.noticeId)
                     navController.navigate("home/${notice.noticeId}")
+                    Log.d("home screen", "RecyclerViewNoticeContent route = ${notice.noticeId}")
                 }
             }
         )
     }
 }
+
 
 //검색 결과 및 기본 recycler outer
 @Composable
@@ -199,42 +167,41 @@ fun NoticeListItem(notice: RNoticeModel, navController: NavHostController, onCli
         modifier = Modifier
             .clickable {
                 onClick()
-                //navController.navigate("noticeDetail/$notice.noticeId")
             }
             .padding(8.dp)
     ) {
-        NoticeImage(notice = notice)
+        NoticeImage(
+            notice = notice,
+            modifier = Modifier
+                .padding(8.dp)
+                .size(84.dp)
+                .clip(RoundedCornerShape(16.dp))
+        )
         Column {
-            Text(text = "this is test")
+            Text(text = "this Id is ${notice.noticeId}")
             Text(text = notice.noticeTitle)
             Text(text = notice.noticeText)
         }
     }
 }
 
-
 @Composable
-fun NoticeImage(notice: RNoticeModel) {
-    Log.d("NoticeImage", "Image URL: ${notice.noticeImgPath}")
+fun NoticeImage(
+    notice: RNoticeModel,
+    modifier: Modifier = Modifier
+) {
     val imageUrl = "http://10.0.2.2:8080/notice/image/${notice.noticeImgPath}"
-    val context = LocalContext.current
 
-    AndroidView(
-        factory = { context ->
-            ImageView(context).apply {
-                Glide.with(context)
-                    .load(imageUrl)
-                    .apply(RequestOptions().placeholder(R.drawable.test).error(R.drawable.test))
-                    .into(this)
-            }
-        },
-        modifier = Modifier
-            .padding(8.dp)
-            .size(84.dp)
-            .clip(RoundedCornerShape(16.dp))
+    GlideImage(
+        imageModel = imageUrl,
+        contentDescription = "Notice Image",
+        modifier = modifier.fillMaxWidth(),
+        contentScale = ContentScale.Crop,
+        error = ImageBitmap.imageResource(id = R.drawable.test)
+
     )
-
 }
+
 
 @Composable
 fun NoticeDetailScreen(
@@ -249,19 +216,54 @@ fun NoticeDetailScreen(
 
     val noticeFlow = viewModel.getNoticeById(noticeId)
     val notice by noticeFlow.collectAsState(initial = null)
+    Log.d("home screen", "RecyclerViewNoticeContent route = ${notice}")
 
-    notice?.let {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = it.noticeTitle)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = it.noticeText)
+    val scrollState = rememberScrollState() //scroll
+
+    notice?.let { safeNotice ->
+        Column(
+            modifier = Modifier
+                //.padding(4.dp)
+                .verticalScroll(scrollState) //scroll
+        ) {
+            Text(
+                text = safeNotice.noticeTitle,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp) // 제목 아래 여백
+            )
+
+            Text(
+                text = "작성일자 : tempo", //%{it.noticeDate}
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp) // 작성일자 아래 여백
+            )
+
+            Divider(color = Color.Black, thickness = 1.dp)
+
+            //Spacer(modifier = Modifier.height(16.dp))
+
+            NoticeImage(
+                notice = safeNotice,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.2f)
+                    //.height(300.dp)
+            )
+
+            Divider(color = Color.Black, thickness = 1.dp)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = safeNotice.noticeText,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
         }
     } ?: Text("Loading...")
 }
-
-
-
-
 
 
 @Composable
@@ -356,8 +358,7 @@ fun AddNoticeScreen(
         Box(modifier = Modifier.fillMaxWidth()){
             Button(
                 onClick = {
-                    //viewModel.addNotice(context)
-                    viewModel.addNotice2(context)
+                    viewModel.addNotice(context)
                     navController.popBackStack()
                 },
                 modifier = Modifier.align(Alignment.Center)

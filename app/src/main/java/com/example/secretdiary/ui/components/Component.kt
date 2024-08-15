@@ -37,6 +37,8 @@ import com.example.secretdiary.ui.home.HomeViewModel
 
 import com.example.secretdiary.ui.home.NoticeDetailScreen
 import com.example.secretdiary.ui.setting.SettingScreen
+import com.example.secretdiary.ui.setting.SettingViewModel
+import com.example.secretdiary.ui.setting.UpdateUserScreen
 
 
 sealed class BottomNavItem(
@@ -164,13 +166,13 @@ private fun MyNavHost(
         }
 
         composable(BottomNavItem.Setting.screenRoute){
-            SettingScreen(viewModel = ComponentViewModel())
+            SettingScreen(navController = navController, settingViewModel = SettingViewModel(), componentViewModel = ComponentViewModel())
         }
 
+        //home
         composable("add_notice"){
             AddNoticeScreen(navController = navController, viewModel = HomeViewModel())
         }
-
 
         composable(
             route = "home/{noticeId}",
@@ -188,6 +190,11 @@ private fun MyNavHost(
                 // noticeId가 null인 경우, 기본 동작을 정의합니다.
                 Text("Notice ID is missing")
             }
+        }
+
+        //setting
+        composable("update_user"){
+            UpdateUserScreen(navController = navController, viewModel = SettingViewModel())
         }
     }
 }
