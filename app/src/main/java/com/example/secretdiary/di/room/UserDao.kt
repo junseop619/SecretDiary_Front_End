@@ -22,5 +22,8 @@ interface UserDao {
     @Query("SELECT * from users WHERE userName = :userName")
     fun getUser(userName: String): Flow<User>
 
+    @Query("SELECT userName FROM Users ORDER BY lastLoginTime DESC LIMIT 1")
+    fun getMostRecentUserName(): String?
+
 }
 

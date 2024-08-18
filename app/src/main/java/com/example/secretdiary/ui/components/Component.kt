@@ -30,6 +30,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.secretdiary.R
+import com.example.secretdiary.di.user.model.RUserModel
 import com.example.secretdiary.ui.friend.FriendScreen
 import com.example.secretdiary.ui.home.AddNoticeScreen
 import com.example.secretdiary.ui.home.HomeScreen
@@ -166,7 +167,7 @@ private fun MyNavHost(
         }
 
         composable(BottomNavItem.Setting.screenRoute){
-            SettingScreen(navController = navController, settingViewModel = SettingViewModel(), componentViewModel = ComponentViewModel())
+            SettingScreen(navController = navController, settingViewModel = SettingViewModel(),componentViewModel = ComponentViewModel())
         }
 
         //home

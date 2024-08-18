@@ -12,4 +12,6 @@ interface UsersRepository {
     suspend fun  deleteUser(user: User)
 
     fun  getUserStream(userName: String): Flow<User?>
+
+    suspend fun getMostRecentUserName(): String?
 }

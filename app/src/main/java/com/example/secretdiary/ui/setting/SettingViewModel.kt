@@ -9,23 +9,95 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.secretdiary.di.SecretDiaryObject
+import com.example.secretdiary.di.notice.model.RNoticeModel
+import com.example.secretdiary.di.user.model.RUserModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+
 import java.io.File
 import javax.inject.Inject
+
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @HiltViewModel
 class SettingViewModel @Inject constructor() : ViewModel(){
 
-    var name : String by mutableStateOf("")
-    var text : String by mutableStateOf("")
+    var userNickName : String by mutableStateOf("")
+    var userText : String by mutableStateOf("")
     var imageUri by mutableStateOf<Uri?>(null)
 
     /*
+    private val _user = MutableStateFlow<RUserModel?>(null)
+    val user: StateFlow<RUserModel?> = _user */
+
+    private val _user = MutableStateFlow<RUserModel?>(null)
+    val user: StateFlow<RUserModel?> = _user
+
+
+    fun loadUserInfo(userEmail: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val call = SecretDiaryObject.getRetrofitSDService.userInfo(userEmail)
+            call.enqueue(object : Callback<RUserModel> {
+                override fun onResponse(call: Call<RUserModel>, response: Response<RUserModel>) {
+                    if (response.isSuccessful) {
+                        response.body()?.let {
+                            _user.value = it
+                            Log.d("Load User viewModel", "success")
+                            Log.d("Load User viewModel", it.userNickName)
+                        }
+                    } else {
+                        val errorBody = response.errorBody()?.string()
+                        val statusCode = response.code()
+                        Log.d("Load User", "Failed: StatusCode = $statusCode, Error = $errorBody")
+                    }
+                }
+
+                override fun onFailure(call: Call<RUserModel>, t: Throwable) {
+                    Log.e("Load User", "Network request failed", t)
+                }
+            })
+        }
+    }
+
+
+    /*
+    fun loadUserInfo(userEmail: String) {
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val call = SecretDiaryObject.getRetrofitSDService.userInfo(userEmail)
+            call.enqueue(object: Callback<RUserModel>{
+                override fun onResponse(call: Call<RUserModel>, response: Response<RUserModel>){
+                    if(response.isSuccessful){
+                        response.body()?.let {
+                            _user.value = it
+
+                            Log.d("Load User viewModel", "success")
+                            Log.d("Load User viewModel", it.userNickName)
+                        }
+                    } else {
+                        val errorBody = response.errorBody()?.string()
+                        val statusCode = response.code()
+                        Log.d("Load User", "Failed: StatusCode = $statusCode, Error = $errorBody")
+                    }
+                }
+                override fun onFailure(call: Call<RUserModel>, t: Throwable){
+                    Log.e("Load User", "Network request failed", t)
+                }
+            })
+        }
+    }*/
+
     fun updateUser(context: Context){
         val file = File(context.cacheDir, "upload_image.jpg")
         try {
@@ -41,21 +113,21 @@ class SettingViewModel @Inject constructor() : ViewModel(){
         }
 
         val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-        val fileBody = MultipartBody.Part.createFormData("noticeImg", file.name, requestFile)
+        val fileBody = MultipartBody.Part.createFormData("userImg", file.name, requestFile)
 
         viewModelScope.launch(Dispatchers.IO) {
-            val response = SecretDiaryObject.getRetrofitSDService.upload("userTest",title,text,fileBody)
+            val response = SecretDiaryObject.getRetrofitSDService.updateUser("test", userNickName, userText, fileBody)
             if(response.isSuccessful){
-                Log.d("Add Notice","Success")
+                Log.d("Update User","Success")
             } else {
                 val errorBody = response.errorBody()?.string()
                 val statusCode = response.code()
-                Log.d("Add Notice", "Failed: StatusCode = $statusCode, Error = $errorBody")
+                Log.d("Update User", "Failed: StatusCode = $statusCode, Error = $errorBody")
             }
         }
     }
 
-     */
 
-     */
+
+
 }

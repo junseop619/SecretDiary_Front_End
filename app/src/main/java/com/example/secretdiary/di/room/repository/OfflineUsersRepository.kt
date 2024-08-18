@@ -13,4 +13,6 @@ class OfflineUsersRepository (
     override suspend fun deleteUser(user: User) = userDao.delete(user)
 
     override fun getUserStream(userName: String): Flow<User?> = userDao.getUser(userName)
+
+    override suspend fun getMostRecentUserName(): String? = userDao.getMostRecentUserName()
 }
