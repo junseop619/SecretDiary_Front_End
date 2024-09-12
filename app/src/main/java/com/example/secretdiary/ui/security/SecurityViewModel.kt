@@ -7,14 +7,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.secretdiary.SDApplication
 import com.example.secretdiary.di.SecretDiaryObject
 import com.example.secretdiary.di.room.User
 import com.example.secretdiary.di.room.UserDatabase
 import com.example.secretdiary.di.room.repository.OfflineUsersRepository
 import com.example.secretdiary.di.room.repository.UsersRepository
-import com.example.secretdiary.di.user.model.LoginModel
-import com.example.secretdiary.di.user.model.UserModel
+import com.example.secretdiary.di.model.user.LoginModel
+import com.example.secretdiary.di.model.user.UserModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

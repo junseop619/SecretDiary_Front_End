@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -30,13 +31,19 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.secretdiary.R
-import com.example.secretdiary.di.user.model.RUserModel
+import com.example.secretdiary.di.room.UserDatabase
+import com.example.secretdiary.di.room.repository.OfflineUsersRepository
+import com.example.secretdiary.di.room.repository.UsersRepository
 import com.example.secretdiary.ui.friend.FriendScreen
+import com.example.secretdiary.ui.friend.FriendViewModel
+import com.example.secretdiary.ui.friend.UserInfoScreen
+import com.example.secretdiary.ui.friend.UserNoticeDetailScreen
 import com.example.secretdiary.ui.home.AddNoticeScreen
 import com.example.secretdiary.ui.home.HomeScreen
 import com.example.secretdiary.ui.home.HomeViewModel
 
 import com.example.secretdiary.ui.home.NoticeDetailScreen
+import com.example.secretdiary.ui.setting.SettingFirstTabScreen
 import com.example.secretdiary.ui.setting.SettingScreen
 import com.example.secretdiary.ui.setting.SettingViewModel
 import com.example.secretdiary.ui.setting.UpdateUserScreen
@@ -64,17 +71,6 @@ fun MainTopAppBar(navController: NavHostController) {
             titleContentColor = MaterialTheme.colorScheme.primary,
         ),
         navigationIcon = {
-            /*
-            if(currentRoute == "add_notice" || currentRoute?.startsWith("noticeDetail") == true){
-                IconButton(onClick = {
-                    navController.popBackStack()
-                }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_back),
-                        contentDescription = "Back"
-                    )
-                }
-            }*/
             if (currentRoute != BottomNavItem.Home.screenRoute &&
                 currentRoute != BottomNavItem.Friend.screenRoute &&
                 currentRoute != BottomNavItem.Setting.screenRoute) {
@@ -125,6 +121,10 @@ fun MainTopAppBar(navController: NavHostController) {
 fun MainScreen(viewModel: ComponentViewModel) {
     val navController = rememberNavController()
 
+    val context = LocalContext.current
+    val userDao = UserDatabase.getDatabase(context).userDao()
+    val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { MainTopAppBar(navController = navController) },
@@ -140,7 +140,8 @@ fun MainScreen(viewModel: ComponentViewModel) {
         Box(modifier = Modifier.padding(it)) {
             MyNavHost(
                 navController = navController,
-                startDestination = BottomNavItem.Home.screenRoute
+                startDestination = BottomNavItem.Home.screenRoute,
+                usersRepository = usersRepository
             )
         }
     }
@@ -150,7 +151,8 @@ fun MainScreen(viewModel: ComponentViewModel) {
 private fun MyNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    startDestination: String
+    startDestination: String,
+    usersRepository: UsersRepository
 ) {
     NavHost(
         modifier = modifier,
@@ -159,11 +161,12 @@ private fun MyNavHost(
     ) {
 
         composable(BottomNavItem.Home.screenRoute){
-            HomeScreen(navController = navController, homeViewModel = HomeViewModel(), componentViewModel = ComponentViewModel())
+            HomeScreen(navController = navController, homeViewModel = HomeViewModel(usersRepository), componentViewModel = ComponentViewModel())
         }
 
+
         composable(BottomNavItem.Friend.screenRoute){
-            FriendScreen(viewModel = ComponentViewModel())
+            FriendScreen(navController = navController, friendViewModel = FriendViewModel(), componentViewModel = ComponentViewModel())
         }
 
         composable(BottomNavItem.Setting.screenRoute){
@@ -172,7 +175,7 @@ private fun MyNavHost(
 
         //home
         composable("add_notice"){
-            AddNoticeScreen(navController = navController, viewModel = HomeViewModel())
+            AddNoticeScreen(navController = navController, viewModel = HomeViewModel(usersRepository))
         }
 
         composable(
@@ -184,7 +187,44 @@ private fun MyNavHost(
             if (noticeId != null) {
                 NoticeDetailScreen(
                     noticeId = noticeId,
-                    viewModel = HomeViewModel(),
+                    viewModel = HomeViewModel(usersRepository),
+                    navController = navController
+                )
+            } else {
+                // noticeId가 null인 경우, 기본 동작을 정의합니다.
+                Text("Notice ID is missing")
+            }
+        }
+
+        //friend
+        composable(
+            route = "friend/info/{userEmail}",
+            arguments = listOf(navArgument("userEmail") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userEmail = backStackEntry.arguments?.getString("userEmail")
+
+            if (userEmail != null) {
+                UserInfoScreen(
+                    navController = navController,
+                    userEmail = userEmail,
+                    friendViewModel = FriendViewModel()
+                )
+            } else {
+                // noticeId가 null인 경우, 기본 동작을 정의합니다.
+                Text("UserEmail is missing")
+            }
+        }
+
+        composable(
+            route = "friend/notice/{noticeId}",
+            arguments = listOf(navArgument("noticeId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val noticeId = backStackEntry.arguments?.getLong("noticeId")
+
+            if (noticeId != null) {
+                UserNoticeDetailScreen(
+                    noticeId = noticeId,
+                    friendViewModel = FriendViewModel(),
                     navController = navController
                 )
             } else {
@@ -196,6 +236,10 @@ private fun MyNavHost(
         //setting
         composable("update_user"){
             UpdateUserScreen(navController = navController, viewModel = SettingViewModel())
+        }
+
+        composable("setting/first"){
+            SettingFirstTabScreen(navController = navController, viewModel = SettingViewModel())
         }
     }
 }

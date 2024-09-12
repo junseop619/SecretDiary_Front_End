@@ -48,13 +48,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.example.secretdiary.R
-import com.example.secretdiary.di.notice.model.RNoticeModel
 import com.example.secretdiary.di.room.UserDatabase
 import com.example.secretdiary.di.room.repository.OfflineUsersRepository
 import com.example.secretdiary.di.room.repository.UsersRepository
-import com.example.secretdiary.di.user.model.RUserModel
 import com.example.secretdiary.ui.components.ComponentViewModel
-import com.example.secretdiary.ui.home.HomeViewModel
 import com.example.secretdiary.ui.home.ListItemButton
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
@@ -273,7 +270,10 @@ fun SettingScreen(
 
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(listOf(
-                "리스트 아이템 1" to { Toast.makeText(context, "list 1", Toast.LENGTH_SHORT).show() },
+                "리스트 아이템 1" to {
+                    Toast.makeText(context, "list 1", Toast.LENGTH_SHORT).show()
+                    navController.navigate("setting/first")
+                               },
                 "리스트 아이템 2" to { Toast.makeText(context, "list 2", Toast.LENGTH_SHORT).show() },
                 "리스트 아이템 3" to { Toast.makeText(context, "list 3", Toast.LENGTH_SHORT).show() }
             )) { (item, onClick) ->
@@ -398,6 +398,26 @@ fun UserImage(
         error = ImageBitmap.imageResource(id = R.drawable.test)
 
     )
+}
+
+@Composable
+fun SettingFirstTabScreen(
+    navController: NavHostController,
+    viewModel: SettingViewModel,
+    modifier: Modifier = Modifier
+){
+    var count by remember { mutableStateOf(0) }
+
+    // UI 구성
+    Column {
+        // 카운트 숫자를 표시하는 텍스트
+        Text(text = "Count: $count", fontSize = 30.sp)
+
+        // 버튼을 클릭할 때마다 count를 1씩 증가시킴
+        Button(onClick = { count++ }) {
+            Text(text = "Increase Count")
+        }
+    }
 }
 
 

@@ -12,7 +12,7 @@ import androidx.room.Room
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Singleton
 
-/*
+
 @Module
 @InstallIn(SingletonComponent::class)
 object RoomModule {
@@ -36,4 +36,3 @@ object RoomModule {
     }
 }
 
- */

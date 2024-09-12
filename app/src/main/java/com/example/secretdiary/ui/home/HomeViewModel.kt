@@ -10,7 +10,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.secretdiary.di.SecretDiaryObject
-import com.example.secretdiary.di.notice.model.RNoticeModel
+import com.example.secretdiary.di.model.notice.RNoticeModel
+import com.example.secretdiary.di.room.UserDatabase
+import com.example.secretdiary.di.room.repository.OfflineUsersRepository
+import com.example.secretdiary.di.room.repository.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +33,9 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @HiltViewModel
-class HomeViewModel @Inject constructor() : ViewModel(){
+class HomeViewModel @Inject constructor(
+    private val userRepository: UsersRepository
+) : ViewModel(){
 
     //add Notice
     var noticeId: Long by mutableLongStateOf(1L)
@@ -48,8 +53,14 @@ class HomeViewModel @Inject constructor() : ViewModel(){
     val searchResults: StateFlow<List<RNoticeModel>> = _searchResults
     private val searchQuery = MutableStateFlow("")
 
+    // 추가된 로딩 상태
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     init {
-        fetchNotices()
+        //fetchNotices()
+        readMyNotice()
+
 
         viewModelScope.launch {
             searchQuery
@@ -65,8 +76,10 @@ class HomeViewModel @Inject constructor() : ViewModel(){
     }
 
 
+
     fun fetchNotices() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            Log.d("fetches call", "success")
             val call = SecretDiaryObject.getRetrofitSDService.readAll()
             call.enqueue(object: Callback<List<RNoticeModel>>{
                 override fun onResponse(call: Call<List<RNoticeModel>>, response: Response<List<RNoticeModel>>) {
@@ -90,6 +103,8 @@ class HomeViewModel @Inject constructor() : ViewModel(){
             })
         }
     }
+
+
 
     //searchNotice
     fun onSearchQueryChange(keyword: String){
@@ -141,7 +156,12 @@ class HomeViewModel @Inject constructor() : ViewModel(){
         val fileBody = MultipartBody.Part.createFormData("noticeImg", file.name, requestFile)
 
         viewModelScope.launch(Dispatchers.IO) {
-            val response = SecretDiaryObject.getRetrofitSDService.upload("userTest",title,text,fileBody)
+            val userDao = UserDatabase.getDatabase(context).userDao()
+            val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
+
+            val userEmail = usersRepository.getMostRecentUserName()
+
+            val response = SecretDiaryObject.getRetrofitSDService.upload(userEmail!!,title,text,fileBody)
             if(response.isSuccessful){
                 Log.d("Add Notice","Success")
             } else {
@@ -152,9 +172,44 @@ class HomeViewModel @Inject constructor() : ViewModel(){
         }
     }
 
+
     fun getNoticeById(noticeId: Long): Flow<RNoticeModel?> {
         return notices.map { list ->
             list.find { it.noticeId == noticeId}
         }
     }
+
+    fun readMyNotice(){
+        viewModelScope.launch(Dispatchers.IO) {
+
+            //val userDao = UserDatabase.getDatabase(context).userDao()
+            //val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
+
+            val userEmail = userRepository.getMostRecentUserName()
+
+            val call = SecretDiaryObject.getRetrofitSDService.readUserNotice(userEmail!!)
+            call.enqueue(object: Callback<List<RNoticeModel>>{
+                override fun onResponse(call: Call<List<RNoticeModel>>, response: Response<List<RNoticeModel>>) {
+                    if(response.isSuccessful){
+                        response.body()?.let {
+                            _notices.value = it
+                            Log.d("read user notice", "success")
+                        } ?: Log.d("read user notice", "Response body is null")
+
+
+                    } else {
+                        Log.d("read user notice", "Response is not successful. Status code: ${response.code()}, Message: ${response.message()}")
+                        response.errorBody()?.let {
+                            Log.d("read user notice", "Error body: ${it.string()}")
+                        }
+                    }
+                }
+                override fun onFailure(call: Call<List<RNoticeModel>>, t: Throwable){
+                    Log.e("read user notice", "Network request failed", t)
+                }
+            })
+        }
+    }
+
+
 }

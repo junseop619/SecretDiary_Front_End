@@ -2,8 +2,9 @@
 
 buildscript {
     //val hiltVersion by extra("2.28-alpha")
-    val kotlinVersion by extra("1.9.0")
-    val hiltVersion by extra("2.44")
+    //val kotlinVersion by extra("2.0.20")
+    val kotlinVersion by extra("2.0.0")
+    val hiltVersion by extra("2.51.1")
     repositories {
         google()
         mavenCentral()
@@ -17,5 +18,4 @@ buildscript {
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.jetbrains.kotlin.android) apply false
-
 }

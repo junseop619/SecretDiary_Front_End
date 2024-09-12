@@ -1,4 +1,4 @@
-package com.example.secretdiary.di.notice.model
+package com.example.secretdiary.di.model.notice
 
 import com.google.gson.annotations.SerializedName
 import okhttp3.MultipartBody

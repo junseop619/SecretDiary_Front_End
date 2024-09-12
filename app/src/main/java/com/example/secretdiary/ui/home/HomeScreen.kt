@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -30,6 +31,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,12 +50,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.secretdiary.R
-import com.example.secretdiary.di.notice.model.RNoticeModel
+import com.example.secretdiary.di.model.notice.RNoticeModel
 import com.example.secretdiary.ui.components.ComponentViewModel
 import com.example.secretdiary.ui.theme.SecretDiaryTheme
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.unit.Dp
 import com.skydoves.landscapist.glide.GlideImage
+
 
 @Composable
 fun HomeScreen(
@@ -62,12 +66,24 @@ fun HomeScreen(
     componentViewModel: ComponentViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     var showDetailNotice by remember { mutableStateOf(false) }
     var selectedNoticeId by remember { mutableStateOf<Long?>(null) }
 
     var searchQuery by remember { mutableStateOf("")}
     val searchResults by homeViewModel.searchResults.collectAsState()
     val notices by homeViewModel.notices.collectAsState()
+
+    //homeViewModel.readMyNotice(context)
+
+    /*
+    LaunchedEffect(notices) {
+        homeViewModel.fetchNotices()
+    }*/
+
+    //homeViewModel.fetchNotices()
+
 
     if (showDetailNotice && selectedNoticeId != null) {
         NoticeDetailScreen(
@@ -137,6 +153,9 @@ fun HomeScreen(
 
 
 
+
+
+
 @Composable
 fun RecyclerViewNoticeContent(
     viewModel: HomeViewModel,
@@ -188,7 +207,7 @@ fun NoticeListItem(notice: RNoticeModel, navController: NavHostController, onCli
 @Composable
 fun NoticeImage(
     notice: RNoticeModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier
 ) {
     val imageUrl = "http://10.0.2.2:8080/notice/image/${notice.noticeImgPath}"
 
@@ -200,6 +219,35 @@ fun NoticeImage(
         error = ImageBitmap.imageResource(id = R.drawable.test)
 
     )
+}
+
+@Composable
+fun PagerIndicattor(
+    modifier: Modifier = Modifier,
+    count: Int,
+    dotSize: Dp,
+    spacedBy: Dp,
+    currentPage: Int,
+    selectedColor: Color,
+    unSelectedColor: Color
+){
+    Row(modifier = modifier, horizontalArrangement =
+    Arrangement.spacedBy(spacedBy)) {
+        (0 until count).forEach { index ->
+            Box(
+                modifier = Modifier
+                    .size(dotSize)
+                    .background(
+                        color = if (index == currentPage) {
+                            selectedColor
+                        } else {
+                            unSelectedColor
+                        },
+                        shape = CircleShape
+                    )
+            )
+        }
+    }
 }
 
 
@@ -216,9 +264,11 @@ fun NoticeDetailScreen(
 
     val noticeFlow = viewModel.getNoticeById(noticeId)
     val notice by noticeFlow.collectAsState(initial = null)
+
     Log.d("home screen", "RecyclerViewNoticeContent route = ${notice}")
 
     val scrollState = rememberScrollState() //scroll
+
 
     notice?.let { safeNotice ->
         Column(
@@ -243,6 +293,7 @@ fun NoticeDetailScreen(
             Divider(color = Color.Black, thickness = 1.dp)
 
             //Spacer(modifier = Modifier.height(16.dp))
+
 
             NoticeImage(
                 notice = safeNotice,
@@ -387,6 +438,7 @@ fun ListItemButton(text: String, onClick: () -> Unit) {
     }
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
@@ -397,4 +449,4 @@ fun DefaultPreview() {
             componentViewModel = ComponentViewModel()
         )
     }
-}
+}*/

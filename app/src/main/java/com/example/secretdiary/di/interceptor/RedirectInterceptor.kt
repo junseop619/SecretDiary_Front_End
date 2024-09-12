@@ -12,14 +12,14 @@ class RedirectInterceptor : Interceptor {
         var response: Response = chain.proceed(request)
         var redirectCount = 0
 
-        while (response.isRedirect && redirectCount < 5) {
+        while (response.isRedirect && redirectCount < 5) { //5
             val location = response.header("Location") ?: break
             request = request.newBuilder().url(location).build()
             response = chain.proceed(request)
             redirectCount++
         }
 
-        if (redirectCount >= 5) {
+        if (redirectCount >= 5) { //5
             throw java.net.ProtocolException("Too many redirects: $redirectCount")
         }
 

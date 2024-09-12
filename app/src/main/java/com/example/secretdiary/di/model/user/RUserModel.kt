@@ -1,4 +1,4 @@
-package com.example.secretdiary.di.user.model
+package com.example.secretdiary.di.model.user
 
 import com.google.gson.annotations.SerializedName
 
