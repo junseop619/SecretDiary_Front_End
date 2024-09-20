@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.secretdiary.di.SecretDiaryObject
 import com.example.secretdiary.di.model.user.RUserModel
+import com.example.secretdiary.di.room.repository.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,9 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @HiltViewModel
-class SettingViewModel @Inject constructor() : ViewModel(){
+class SettingViewModel @Inject constructor(
+    private val userRepository: UsersRepository
+) : ViewModel(){
 
     var userNickName : String by mutableStateOf("")
     var userText : String by mutableStateOf("")
@@ -96,6 +99,7 @@ class SettingViewModel @Inject constructor() : ViewModel(){
     }*/
 
     fun updateUser(context: Context){
+
         val file = File(context.cacheDir, "upload_image.jpg")
         try {
             context.contentResolver.openInputStream(imageUri!!)?.use { inputStream ->
@@ -113,7 +117,8 @@ class SettingViewModel @Inject constructor() : ViewModel(){
         val fileBody = MultipartBody.Part.createFormData("userImg", file.name, requestFile)
 
         viewModelScope.launch(Dispatchers.IO) {
-            val response = SecretDiaryObject.getRetrofitSDService.updateUser("test", userNickName, userText, fileBody)
+            val userEmail = userRepository.getMostRecentUserName()
+            val response = SecretDiaryObject.getRetrofitSDService.updateUser(userEmail!!, userNickName, userText, fileBody)
             if(response.isSuccessful){
                 Log.d("Update User","Success")
             } else {
@@ -122,6 +127,14 @@ class SettingViewModel @Inject constructor() : ViewModel(){
                 Log.d("Update User", "Failed: StatusCode = $statusCode, Error = $errorBody")
             }
         }
+    }
+
+    fun logout(){
+
+    }
+
+    fun deleteUser(){
+        Log.d("delete","delete")
     }
 
 

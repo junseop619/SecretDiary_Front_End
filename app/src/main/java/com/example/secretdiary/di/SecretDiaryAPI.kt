@@ -11,6 +11,8 @@ import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -25,8 +27,19 @@ interface SecretDiaryAPI {
     @POST("security/join") //client ->db
     suspend fun joinUser(@Body userModel: UserModel) : Response<Void>
 
+
+    /*
     @POST("security/login")
     suspend fun loginUser(@Body loginModel: LoginModel): Response<Void>
+    */
+
+    @POST("security/login")
+    suspend fun loginUser(@Body loginModel: LoginModel): Response<String>
+
+    @POST("security/autoLogin")
+    suspend fun autoLogin(@Header("Authorization") token: String): Response<Void>
+
+
 
     @Multipart
     @PUT("security/update/{userEmail}")
@@ -57,18 +70,29 @@ interface SecretDiaryAPI {
     @GET("search/notice")
     fun search2(@Query("keyword") query: String): Call<List<RNoticeModel>>
 
+    @GET("read/detail/notice")
+    fun readDetailNotice(@Query("noticeId") query: Long): Call<RNoticeModel>
+
 
     @GET("security/user/{userEmail}")
     fun userInfo(@Path("userEmail") userEmail: String): Call<RUserModel>
 
 
     //friend
-    @GET("search/user")
-    fun searchUser(@Query("keyword") query: String): Call<List<RUserModel>>
+    /*
+    @GET("search/{userEmail}/user")
+    fun searchUser(@Query("keyword") query: String,  userEmail: String): Call<List<RUserModel>>
+     */
+
+    @GET("search/{keyword}/{userEmail}")
+    fun searchUser2(@Path("keyword") keyword: String,  @Path("userEmail") userEmail: String): Call<List<RUserModel>>
 
 
     @GET("friend/check/{userEmail}/{friendEmail}")
     fun checkFriend(@Path("userEmail") userEmail: String, @Path("friendEmail") friendEmail: String): Call<Boolean>
+
+    @GET("friend/request/check/{userEmail}/{friendEmail}")
+    fun checkRequest(@Path("userEmail") userEmail: String, @Path("friendEmail") friendEmail: String): Call<Boolean>
 
 
     @POST("friend/request/{userEmail}/{friendEmail}")

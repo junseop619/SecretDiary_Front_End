@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.secretdiary"
-        minSdk = 24
+        minSdk = 26 //24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -42,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.3"

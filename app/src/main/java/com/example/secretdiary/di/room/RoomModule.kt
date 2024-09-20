@@ -18,6 +18,7 @@ import javax.inject.Singleton
 object RoomModule {
 
 
+
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): UserDatabase {
@@ -25,10 +26,12 @@ object RoomModule {
             .build()
     }
 
+
     @Provides
     fun provideUserDao(app: Application): UserDao {
         return UserDatabase.getDatabase(app).userDao()
     }
+
 
     @Provides
     fun provideUsersRepository(userDao: UserDao): UsersRepository {

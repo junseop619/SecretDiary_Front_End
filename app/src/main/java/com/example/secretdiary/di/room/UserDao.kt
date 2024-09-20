@@ -25,5 +25,8 @@ interface UserDao {
     @Query("SELECT userName FROM Users ORDER BY lastLoginTime DESC LIMIT 1")
     fun getMostRecentUserName(): String?
 
+    @Query("DELETE FROM Users")
+    fun clear()
+
 }
 

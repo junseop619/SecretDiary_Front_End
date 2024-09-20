@@ -14,4 +14,6 @@ interface UsersRepository {
     fun  getUserStream(userName: String): Flow<User?>
 
     suspend fun getMostRecentUserName(): String?
+
+    fun clearRoom()
 }

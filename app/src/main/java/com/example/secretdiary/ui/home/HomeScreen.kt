@@ -57,6 +57,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.Dp
 import com.skydoves.landscapist.glide.GlideImage
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.util.Locale
 
 
 @Composable
@@ -75,16 +78,6 @@ fun HomeScreen(
     val searchResults by homeViewModel.searchResults.collectAsState()
     val notices by homeViewModel.notices.collectAsState()
 
-    //homeViewModel.readMyNotice(context)
-
-    /*
-    LaunchedEffect(notices) {
-        homeViewModel.fetchNotices()
-    }*/
-
-    //homeViewModel.fetchNotices()
-
-
     if (showDetailNotice && selectedNoticeId != null) {
         NoticeDetailScreen(
             navController = navController,
@@ -95,7 +88,8 @@ fun HomeScreen(
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
-            Text(text = "Home")
+
+            Spacer(modifier = Modifier.height(10.dp))
 
             OutlinedTextField(
                 modifier = Modifier
@@ -140,7 +134,6 @@ fun HomeScreen(
 
             // NoticeListItem 클릭 시 showDetailNotice를 true로 변경
             //recycler view
-
             RecyclerViewNoticeContent(viewModel = homeViewModel, navController = navController) { noticeId ->
                 selectedNoticeId = noticeId
                 showDetailNotice = true
@@ -150,10 +143,6 @@ fun HomeScreen(
         }
     }
 }
-
-
-
-
 
 
 @Composable
@@ -200,6 +189,7 @@ fun NoticeListItem(notice: RNoticeModel, navController: NavHostController, onCli
             Text(text = "this Id is ${notice.noticeId}")
             Text(text = notice.noticeTitle)
             Text(text = notice.noticeText)
+            //Text(text = notice.date) //test date update
         }
     }
 }
@@ -221,35 +211,6 @@ fun NoticeImage(
     )
 }
 
-@Composable
-fun PagerIndicattor(
-    modifier: Modifier = Modifier,
-    count: Int,
-    dotSize: Dp,
-    spacedBy: Dp,
-    currentPage: Int,
-    selectedColor: Color,
-    unSelectedColor: Color
-){
-    Row(modifier = modifier, horizontalArrangement =
-    Arrangement.spacedBy(spacedBy)) {
-        (0 until count).forEach { index ->
-            Box(
-                modifier = Modifier
-                    .size(dotSize)
-                    .background(
-                        color = if (index == currentPage) {
-                            selectedColor
-                        } else {
-                            unSelectedColor
-                        },
-                        shape = CircleShape
-                    )
-            )
-        }
-    }
-}
-
 
 @Composable
 fun NoticeDetailScreen(
@@ -269,7 +230,6 @@ fun NoticeDetailScreen(
 
     val scrollState = rememberScrollState() //scroll
 
-
     notice?.let { safeNotice ->
         Column(
             modifier = Modifier
@@ -283,17 +243,17 @@ fun NoticeDetailScreen(
                     .padding(bottom = 4.dp) // 제목 아래 여백
             )
 
+            Log.d("date check","date : ${safeNotice.date.toString()}")
+
             Text(
-                text = "작성일자 : tempo", //%{it.noticeDate}
+                text = "작성일자 : ${safeNotice.date}", //%{it.noticeDate}
+                //text = "작성일자 : ${LocalDateTime.now()}",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp) // 작성일자 아래 여백
             )
 
             Divider(color = Color.Black, thickness = 1.dp)
-
-            //Spacer(modifier = Modifier.height(16.dp))
-
 
             NoticeImage(
                 notice = safeNotice,
@@ -382,13 +342,6 @@ fun AddNoticeScreen(
         Text(text = "제한 조건")
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        /*
-        Image(
-            painter = painterResource(id = R.drawable.add_img),
-            contentDescription = "addImage",
-            modifier = Modifier.size(100.dp)
-        )*/
 
         selectedImageUri?.let {
             Image(

@@ -47,6 +47,9 @@ import com.example.secretdiary.ui.setting.SettingFirstTabScreen
 import com.example.secretdiary.ui.setting.SettingScreen
 import com.example.secretdiary.ui.setting.SettingViewModel
 import com.example.secretdiary.ui.setting.UpdateUserScreen
+import com.example.secretdiary.ui.theme.Purple40
+import com.example.secretdiary.ui.theme.lightBlue
+import com.example.secretdiary.ui.theme.mediumBlue
 
 
 sealed class BottomNavItem(
@@ -55,7 +58,6 @@ sealed class BottomNavItem(
     object Home : BottomNavItem(R.string.Home, R.drawable.ic_home, "home")
     object Friend : BottomNavItem(R.string.Friend, R.drawable.ic_person, "friend")
     object Setting : BottomNavItem(R.string.Setting, R.drawable.ic_settings, "setting")
-    //object NoticeDetail : BottomNavItem(R.string.Home, R.drawable.ic_home, "notice_detail/{noticeId}")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,10 +67,21 @@ fun MainTopAppBar(navController: NavHostController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     TopAppBar(
-        title = { Text(text = "Secret Diary") },
+
+        //title = { Text(text = "Secret Diary") },
+        title = {
+            Text(
+                text = when (currentRoute) {
+                    BottomNavItem.Setting.screenRoute -> "내 설정"
+                    BottomNavItem.Friend.screenRoute -> "내 친구"
+                    else -> "Secret Diary"
+                }
+            )
+        },
+
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
+            containerColor = lightBlue,
+            titleContentColor = Color.Black
         ),
         navigationIcon = {
             if (currentRoute != BottomNavItem.Home.screenRoute &&
@@ -91,26 +104,28 @@ fun MainTopAppBar(navController: NavHostController) {
                         navController.navigate("add_notice")
                     }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_home),
+                            painter = painterResource(id = R.drawable.ic_add_notice),
                             contentDescription = "Home Action"
                         )
                     }
                 }
                 BottomNavItem.Friend.screenRoute -> {
+                    /*
                     IconButton(onClick = { /* Friend action */ }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_person),
                             contentDescription = "Friend Action"
                         )
-                    }
+                    }*/
                 }
                 BottomNavItem.Setting.screenRoute -> {
+                    /*
                     IconButton(onClick = { /* Setting action */ }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_settings),
                             contentDescription = "Setting Action"
                         )
-                    }
+                    }*/
                 }
             }
         }
@@ -130,9 +145,9 @@ fun MainScreen(viewModel: ComponentViewModel) {
         topBar = { MainTopAppBar(navController = navController) },
         bottomBar = {
             MyBottomNavigation(
-                containerColor = Color.Red,
+                containerColor = mediumBlue,//Color.Red,
                 contentColor = Color.White,
-                indicatorColor = Color.Green,
+                indicatorColor = lightBlue,
                 navController = navController
             )
         }
@@ -166,11 +181,11 @@ private fun MyNavHost(
 
 
         composable(BottomNavItem.Friend.screenRoute){
-            FriendScreen(navController = navController, friendViewModel = FriendViewModel(), componentViewModel = ComponentViewModel())
+            FriendScreen(navController = navController, friendViewModel = FriendViewModel(usersRepository), componentViewModel = ComponentViewModel())
         }
 
         composable(BottomNavItem.Setting.screenRoute){
-            SettingScreen(navController = navController, settingViewModel = SettingViewModel(),componentViewModel = ComponentViewModel())
+            SettingScreen(navController = navController, settingViewModel = SettingViewModel(usersRepository),componentViewModel = ComponentViewModel())
         }
 
         //home
@@ -207,7 +222,7 @@ private fun MyNavHost(
                 UserInfoScreen(
                     navController = navController,
                     userEmail = userEmail,
-                    friendViewModel = FriendViewModel()
+                    friendViewModel = FriendViewModel(usersRepository)
                 )
             } else {
                 // noticeId가 null인 경우, 기본 동작을 정의합니다.
@@ -224,7 +239,7 @@ private fun MyNavHost(
             if (noticeId != null) {
                 UserNoticeDetailScreen(
                     noticeId = noticeId,
-                    friendViewModel = FriendViewModel(),
+                    friendViewModel = FriendViewModel(usersRepository),
                     navController = navController
                 )
             } else {
@@ -235,11 +250,11 @@ private fun MyNavHost(
 
         //setting
         composable("update_user"){
-            UpdateUserScreen(navController = navController, viewModel = SettingViewModel())
+            UpdateUserScreen(navController = navController, viewModel = SettingViewModel(usersRepository))
         }
 
         composable("setting/first"){
-            SettingFirstTabScreen(navController = navController, viewModel = SettingViewModel())
+            SettingFirstTabScreen(navController = navController, viewModel = SettingViewModel(usersRepository))
         }
     }
 }

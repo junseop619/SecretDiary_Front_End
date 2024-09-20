@@ -15,4 +15,6 @@ class OfflineUsersRepository (
     override fun getUserStream(userName: String): Flow<User?> = userDao.getUser(userName)
 
     override suspend fun getMostRecentUserName(): String? = userDao.getMostRecentUserName()
+
+    override fun clearRoom() = userDao.clear()
 }

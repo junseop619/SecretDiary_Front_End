@@ -58,9 +58,7 @@ class HomeViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean> = _isLoading
 
     init {
-        //fetchNotices()
         readMyNotice()
-
 
         viewModelScope.launch {
             searchQuery
@@ -74,36 +72,6 @@ class HomeViewModel @Inject constructor(
                 }
         }
     }
-
-
-
-    fun fetchNotices() {
-        viewModelScope.launch(Dispatchers.IO) {
-            Log.d("fetches call", "success")
-            val call = SecretDiaryObject.getRetrofitSDService.readAll()
-            call.enqueue(object: Callback<List<RNoticeModel>>{
-                override fun onResponse(call: Call<List<RNoticeModel>>, response: Response<List<RNoticeModel>>) {
-                    if(response.isSuccessful){
-                        response.body()?.let {
-                            _notices.value = it
-                            Log.d("read", "success")
-                        } ?: Log.d("read", "Response body is null")
-
-
-                    } else {
-                        Log.d("read", "Response is not successful. Status code: ${response.code()}, Message: ${response.message()}")
-                        response.errorBody()?.let {
-                            Log.d("read", "Error body: ${it.string()}")
-                        }
-                    }
-                }
-                override fun onFailure(call: Call<List<RNoticeModel>>, t: Throwable){
-                    Log.e("read", "Network request failed", t)
-                }
-            })
-        }
-    }
-
 
 
     //searchNotice
@@ -122,7 +90,6 @@ class HomeViewModel @Inject constructor(
                             Log.d("search_read", "success")
                         } ?: Log.d("search_read", "Response body is null")
 
-
                     } else {
                         Log.d("search_read", "Response is not successful. Status code: ${response.code()}, Message: ${response.message()}")
                         response.errorBody()?.let {
@@ -136,7 +103,6 @@ class HomeViewModel @Inject constructor(
             })
         }
     }
-
 
     fun addNotice(context: Context){
         val file = File(context.cacheDir, "upload_image.jpg")
@@ -182,9 +148,6 @@ class HomeViewModel @Inject constructor(
     fun readMyNotice(){
         viewModelScope.launch(Dispatchers.IO) {
 
-            //val userDao = UserDatabase.getDatabase(context).userDao()
-            //val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
-
             val userEmail = userRepository.getMostRecentUserName()
 
             val call = SecretDiaryObject.getRetrofitSDService.readUserNotice(userEmail!!)
@@ -194,6 +157,8 @@ class HomeViewModel @Inject constructor(
                         response.body()?.let {
                             _notices.value = it
                             Log.d("read user notice", "success")
+                            Log.d("date check", "viweModelDate = ${_notices.value}")
+                            Log.d("date check Raw Response", response.raw().toString())
                         } ?: Log.d("read user notice", "Response body is null")
 
 

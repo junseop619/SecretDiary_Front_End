@@ -22,8 +22,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -38,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
@@ -47,133 +51,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
+import com.example.secretdiary.BuildConfig
 import com.example.secretdiary.R
 import com.example.secretdiary.di.room.UserDatabase
 import com.example.secretdiary.di.room.repository.OfflineUsersRepository
 import com.example.secretdiary.di.room.repository.UsersRepository
 import com.example.secretdiary.ui.components.ComponentViewModel
 import com.example.secretdiary.ui.home.ListItemButton
+import com.example.secretdiary.ui.theme.darkBlue
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
-/*
-@Composable
-fun SettingScreen(
-    navController: NavHostController,
-    settingViewModel: SettingViewModel,
-    componentViewModel: ComponentViewModel,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-    val user by settingViewModel.user.collectAsState()
-
-    LaunchedEffect(Unit) {
-        val userDao = UserDatabase.getDatabase(context).userDao()
-        val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
-
-        val userRoomEmail = withContext(Dispatchers.IO) {
-            usersRepository.getMostRecentUserName()
-        }
-
-        if (userRoomEmail != null) {
-            settingViewModel.loadUserInfo(userRoomEmail)
-            Log.d("Load User Room", "userEmail = $userRoomEmail")
-        } else {
-            Toast.makeText(context, "최근 로그인한 사용자가 없습니다.", Toast.LENGTH_SHORT).show()
-            Log.d("Load User Room", "Failed")
-        }
-    }
-
-    /*
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(text = "Profile")
-        Row {
-            UserImage(
-                imageUri = user?.userImgPath,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(84.dp)
-                    .clip(RoundedCornerShape(CornerSize(16.dp)))
-            )
-            Column {
-                Text(text = user?.userEmail ?: "No Name")
-                Text(
-                    text = user?.userText ?: "No Text",
-                    modifier = Modifier
-                        .size(width = 80.dp, height = 100.dp)
-                        .padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(1.dp))
-
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Button(
-                onClick = {
-                    navController.navigate("update_user")
-                },
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxWidth(0.8f)
-            ) {
-                Text("내정보 수정하기")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(Color.Black)
-        )
-
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(listOf(
-                "리스트 아이템 1" to { Toast.makeText(context, "list 1", Toast.LENGTH_SHORT).show() },
-                "리스트 아이템 2" to { Toast.makeText(context, "list 2", Toast.LENGTH_SHORT).show() },
-                "리스트 아이템 3" to { Toast.makeText(context, "list 3", Toast.LENGTH_SHORT).show() }
-            )) { (item, onClick) ->
-                ListItemButton(text = item, onClick = onClick)
-                Divider(color = Color.Black, thickness = 1.dp)
-            }
-        }
-    }*/
-    Column(modifier = Modifier.fillMaxSize()) {
-        if (user == null) {
-            // 로딩 스피너를 표시합니다.
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-        } else {
-            // 기존 UI를 렌더링합니다.
-            Text(text = "Profile")
-            Row {
-                UserImage(
-                    imageUri = user?.userImgPath,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .size(84.dp)
-                        .clip(RoundedCornerShape(CornerSize(16.dp)))
-                )
-                Column {
-                    Text(text = user?.userEmail ?: "No Name")
-                    Text(
-                        text = user?.userText ?: "No Text",
-                        modifier = Modifier
-                            .size(width = 80.dp, height = 100.dp)
-                            .padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                }
-            }
-            // 나머지 UI 코드...
-        }
-    }
-}*/
 
 @Composable
 fun SettingScreen(
@@ -187,6 +75,12 @@ fun SettingScreen(
 
     var userRoomEmail by remember { mutableStateOf<String?>(null) }
     Log.d("Load User Room1", "userEmail = $userRoomEmail")
+
+
+    var showVersionDialog by remember { mutableStateOf(false) } // 버전 정보
+    var showLogOutDialog by remember { mutableStateOf(false)} //로그아웃
+    var showDeleteUserDialog by remember { mutableStateOf(false)} //회원 탈퇴
+
 
     // LaunchedEffect에서 userRoomEmail에 따라 동작하도록 설정
     LaunchedEffect(Unit) {
@@ -205,7 +99,7 @@ fun SettingScreen(
         Log.d("Load User Room3", "userEmail = $userRoomEmail")
         settingViewModel.loadUserInfo(userRoomEmail!!)
     } else {
-        Toast.makeText(context, "최근 로그인한 사용자가 없습니다.", Toast.LENGTH_SHORT).show()
+        //Toast.makeText(context, "최근 로그인한 사용자가 없습니다.", Toast.LENGTH_SHORT).show()
         Log.d("Load User Room", "Failed")
     }
 
@@ -220,7 +114,9 @@ fun SettingScreen(
             }
             else -> {
                 Log.d("SettingScreen", "User loaded: ${user?.userEmail}")
-                Text(text = "Profile")
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Row {
                     UserImage(
                         imageUri = user?.userImgPath,
@@ -251,6 +147,12 @@ fun SettingScreen(
                 onClick = {
                     navController.navigate("update_user")
                 },
+                colors = ButtonColors(
+                    containerColor = darkBlue,
+                    contentColor = Color.White,
+                    disabledContentColor = Color.Black,
+                    disabledContainerColor = Color.Black
+                ),
                 modifier = Modifier
                     .align(Alignment.Center)
                     .fillMaxWidth(0.8f)
@@ -268,20 +170,71 @@ fun SettingScreen(
                 .background(Color.Black)
         )
 
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+        Text("설정")
+
+        Divider(color = Color.Black, thickness = 1.dp)
+
+        LazyColumn {
             items(listOf(
                 "리스트 아이템 1" to {
                     Toast.makeText(context, "list 1", Toast.LENGTH_SHORT).show()
                     navController.navigate("setting/first")
-                               },
-                "리스트 아이템 2" to { Toast.makeText(context, "list 2", Toast.LENGTH_SHORT).show() },
-                "리스트 아이템 3" to { Toast.makeText(context, "list 3", Toast.LENGTH_SHORT).show() }
+                },
+                "버전 정보" to {
+                    showVersionDialog = true // 버전 정보 다이얼로그 열기
+                },
+                "로그아웃" to {
+                    showLogOutDialog = true
+                },
+                "회원 탈퇴" to {
+                    showDeleteUserDialog = true
+                }
             )) { (item, onClick) ->
-                ListItemButton(text = item, onClick = onClick)
+                ListItemButton(
+                    text = item,
+                    onClick = onClick,
+                    modifier = Modifier
+                )
+
                 Divider(color = Color.Black, thickness = 1.dp)
             }
         }
+    }
 
+
+    if(showVersionDialog){
+        VersionInfoDialog(onDismiss = { showVersionDialog = false })
+    }
+
+    if(showLogOutDialog){
+        LogOutDialog(settingViewModel,onDismiss = {showLogOutDialog = false})
+    }
+
+    if(showDeleteUserDialog){
+        DeleteUserDialog(settingViewModel,onDismiss = {showDeleteUserDialog = false})
+    }
+}
+
+@Composable
+fun ListItemButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier, // modifier 파라미터 추가
+    backGroundColor: Color = Color.Transparent, //투명한 배경색
+    contentColor: Color = Color.Black
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = backGroundColor,
+            contentColor = contentColor
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(0.dp),
+        shape = RectangleShape
+    ) {
+        Text(text)
     }
 }
 
@@ -420,5 +373,123 @@ fun SettingFirstTabScreen(
     }
 }
 
+
+//버전정보
+@Composable
+fun VersionInfoDialog(onDismiss: () -> Unit) {
+    var version = BuildConfig.VERSION_NAME
+
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .size(300.dp, 200.dp)
+                .background(Color.White, shape = RoundedCornerShape(16.dp))
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "버전 정보", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(text = "현재 버전: ${version}", fontSize = 16.sp)
+
+                Button(onClick = onDismiss) {
+                    Text("닫기")
+                }
+            }
+        }
+    }
+}
+
+
+//로그아웃
+@Composable
+fun LogOutDialog(
+    settingViewModel: SettingViewModel,
+    onDismiss: () -> Unit
+) {
+    var version = BuildConfig.VERSION_NAME
+
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .size(300.dp, 200.dp)
+                .background(Color.White, shape = RoundedCornerShape(16.dp))
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "로그아웃", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(text = "로그아웃 하시겠습니까?", fontSize = 16.sp)
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(25.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            settingViewModel.logout()
+                            onDismiss()
+                        }
+                    ) {
+                        Text("   예   ")
+                    }
+
+                    Button(onClick = onDismiss) {
+                        Text("아니요")
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+//회원탈퇴
+@Composable
+fun DeleteUserDialog(
+    settingViewModel: SettingViewModel,
+    onDismiss: () -> Unit
+) {
+    var version = BuildConfig.VERSION_NAME
+
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .size(300.dp, 200.dp)
+                .background(Color.White, shape = RoundedCornerShape(16.dp))
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "회원탈퇴", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(text = "회원탈퇴 하시겠습니까?", fontSize = 16.sp)
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(25.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            settingViewModel.deleteUser()
+                            onDismiss()
+                        }
+                    ) {
+                        Text("   예   ")
+                    }
+
+                    Button(onClick = onDismiss) {
+                        Text("아니요")
+                    }
+                }
+            }
+        }
+    }
+}
 
 

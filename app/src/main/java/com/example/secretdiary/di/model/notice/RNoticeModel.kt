@@ -1,6 +1,8 @@
 package com.example.secretdiary.di.model.notice
 
 import com.google.gson.annotations.SerializedName
+import java.time.LocalDateTime
+import java.util.Date
 
 data class RNoticeModel(
     @SerializedName("noticeId")
@@ -16,5 +18,8 @@ data class RNoticeModel(
     val noticeText: String,
 
     @SerializedName("noticeImgPath")
-    val noticeImgPath: String?
+    val noticeImgPath: String?,
+
+    @SerializedName("date")
+    val date: String
 )

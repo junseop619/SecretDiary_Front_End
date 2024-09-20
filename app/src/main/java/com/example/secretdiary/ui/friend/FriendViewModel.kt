@@ -26,7 +26,9 @@ import retrofit2.Response
 import javax.inject.Inject
 
 @HiltViewModel
-class FriendViewModel @Inject constructor() : ViewModel(){
+class FriendViewModel @Inject constructor(
+    private val userRepository: UsersRepository
+) : ViewModel(){
 
     //my Friend(tab 1)
     private val _myFriends = MutableStateFlow<List<FriendModel>>(emptyList())
@@ -51,17 +53,26 @@ class FriendViewModel @Inject constructor() : ViewModel(){
     private val _friendExist = MutableStateFlow<Boolean?>(null)
     val friendExist: StateFlow<Boolean?> = _friendExist
 
+    private val _requestExist = MutableStateFlow<Boolean?>(null)
+    val requestExist: StateFlow<Boolean?> = _requestExist
+
     private val _notices = MutableStateFlow<List<RNoticeModel>>(emptyList())
     val notices: StateFlow<List<RNoticeModel>> = _notices
 
     private val _requestLists = MutableStateFlow<List<FriendModel>>(emptyList())
     val requestLists: StateFlow<List<FriendModel>> = _requestLists
 
-
+    private val _detailNotice = MutableStateFlow<RNoticeModel?>(null)
+    val detailNotice: StateFlow<RNoticeModel?> = _detailNotice
 
 
     init {
         //fetchNotices()
+        //readFriendNotice()
+        /*
+        if(_user.value!!.userEmail != null){
+            readFriendNotice(_user.value!!.userEmail)
+        }*/
 
         viewModelScope.launch {
             /*
@@ -124,8 +135,9 @@ class FriendViewModel @Inject constructor() : ViewModel(){
 
     //tab2 - 유저 검색
     fun searchUser(keyword: String){
-        viewModelScope.launch {
-            val call = SecretDiaryObject.getRetrofitSDService.searchUser(keyword) //searchUser
+        viewModelScope.launch(Dispatchers.IO) {
+            val userEmail = userRepository.getMostRecentUserName()
+            val call = SecretDiaryObject.getRetrofitSDService.searchUser2(keyword, userEmail!!) //searchUser
             call.enqueue(object: Callback<List<RUserModel>> {
                 override fun onResponse(call: Call<List<RUserModel>>, response: Response<List<RUserModel>>) {
                     if(response.isSuccessful){
@@ -202,6 +214,31 @@ class FriendViewModel @Inject constructor() : ViewModel(){
                         val errorBody = response.errorBody()?.string()
                         val statusCode = response.code()
                         Log.d("check friend", "Failed: StatusCode = $statusCode, Error = $errorBody")
+                    }
+                }
+
+                override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                    Log.e("check friend", "Network request failed", t)
+                }
+            })
+        }
+    }
+
+    //친구요청 검증
+    fun checkRequest(userEmail: String, friendEmail: String){
+        viewModelScope.launch(Dispatchers.IO) {
+            val call = SecretDiaryObject.getRetrofitSDService.checkRequest(userEmail, friendEmail)
+            call.enqueue(object : Callback<Boolean> {
+                override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                    if (response.isSuccessful) {
+                        response.body()?.let {
+                            _requestExist.value = it
+                            Log.d("check request", "success")
+                        }
+                    } else {
+                        val errorBody = response.errorBody()?.string()
+                        val statusCode = response.code()
+                        Log.d("check request", "Failed: StatusCode = $statusCode, Error = $errorBody")
                     }
                 }
 
@@ -309,7 +346,7 @@ class FriendViewModel @Inject constructor() : ViewModel(){
     }
 
     fun readFriendNotice(userEmail: String){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val call = SecretDiaryObject.getRetrofitSDService.readUserNotice(userEmail)
             call.enqueue(object: Callback<List<RNoticeModel>>{
                 override fun onResponse(call: Call<List<RNoticeModel>>, response: Response<List<RNoticeModel>>) {
@@ -361,6 +398,32 @@ class FriendViewModel @Inject constructor() : ViewModel(){
 
                 override fun onFailure(call: Call<List<FriendModel>>, t: Throwable) {
                     Log.e("refresh Friend Request", "Network request failed", t)
+                }
+            })
+        }
+    }
+
+    fun readDetailNotice(noticeId: Long){
+        viewModelScope.launch(Dispatchers.IO) {
+            val call = SecretDiaryObject.getRetrofitSDService.readDetailNotice(noticeId)
+            call.enqueue(object: Callback<RNoticeModel>{
+                override fun onResponse(call: Call<RNoticeModel>, response: Response<RNoticeModel>) {
+                    if(response.isSuccessful){
+                        response.body()?.let {
+                            _detailNotice.value = it
+                            Log.d("read user notice", "success:")
+                        } ?: Log.d("read user notice", "Response body is null")
+
+
+                    } else {
+                        Log.d("read user notice", "Response is not successful. Status code: ${response.code()}, Message: ${response.message()}")
+                        response.errorBody()?.let {
+                            Log.d("read user notice", "Error body: ${it.string()}")
+                        }
+                    }
+                }
+                override fun onFailure(call: Call<RNoticeModel>, t: Throwable){
+                    Log.e("read user notice", "Network request failed", t)
                 }
             })
         }

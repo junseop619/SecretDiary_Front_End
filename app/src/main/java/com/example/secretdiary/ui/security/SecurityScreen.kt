@@ -34,9 +34,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.secretdiary.di.room.UserDatabase
 import com.example.secretdiary.di.room.repository.OfflineUsersRepository
+import com.example.secretdiary.di.room.repository.UsersRepository
 import com.example.secretdiary.ui.components.ComponentViewModel
 import com.example.secretdiary.ui.components.MainScreen
 import com.example.secretdiary.ui.home.HomeViewModel
+import com.example.secretdiary.ui.setting.SettingViewModel
 //import com.example.secretdiary.ui.home.MainScreen
 import com.example.secretdiary.ui.theme.SecretDiaryTheme
 
@@ -53,7 +55,16 @@ fun SecurityScreen(
     navController: NavHostController = rememberNavController()
 ) {
     val context = LocalContext.current
-    val securityViewModel = remember { SecurityViewModel(context) }
+    val userDao = UserDatabase.getDatabase(context).userDao()
+    val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
+
+    val securityViewModel = remember { SecurityViewModel(context, usersRepository) }
+
+    LaunchedEffect(Unit) {
+        securityViewModel.autoLogin()
+
+    }
+
     Scaffold(
 
     ) { innerPadding ->
@@ -102,6 +113,7 @@ fun LoginScreen(
     viewModel: SecurityViewModel,
     modifier: Modifier = Modifier
 ){
+    val context = LocalContext.current
     val requestResult by viewModel.requestResult.collectAsState()
     val alertMessage by remember { viewModel::alertMessage }
 
@@ -112,6 +124,9 @@ fun LoginScreen(
         } else if(requestResult == false){
             viewModel.resetResult()
         }
+        val userDao = UserDatabase.getDatabase(context).userDao()
+        val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
+        //usersRepository.clearRoom()
     }
 
     if (alertMessage != null) {
@@ -138,14 +153,14 @@ fun LoginScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             TextField(
-                value = viewModel.email,
-                onValueChange = { viewModel.email = it },
+                value = viewModel.loginEmail,
+                onValueChange = { viewModel.loginEmail = it },
                 label = { Text("ID") },
                 modifier = Modifier.weight(1f)
             )
             TextField(
-                value = viewModel.password,
-                onValueChange = { viewModel.password = it },
+                value = viewModel.loginPassword,
+                onValueChange = { viewModel.loginPassword = it },
                 label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.weight(1f)
@@ -234,6 +249,7 @@ fun JoinScreen(
     }
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview2() {
@@ -250,4 +266,4 @@ fun DefaultPreview2() {
                 .fillMaxSize()
         )
     }
-}
+}*/

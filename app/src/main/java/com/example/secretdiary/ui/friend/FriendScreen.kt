@@ -24,6 +24,8 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,8 +57,11 @@ import com.example.secretdiary.ui.components.ComponentViewModel
 import com.example.secretdiary.ui.home.HomeViewModel
 import com.example.secretdiary.ui.home.NoticeImage
 import com.example.secretdiary.ui.home.NoticeListItem
+import com.example.secretdiary.ui.theme.darkBlue
+import com.example.secretdiary.ui.theme.mediumBlue
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -78,7 +83,12 @@ fun FriendScreen(
         TabRow(
             selectedTabIndex = selectedTabIndex.value,
             modifier = Modifier.fillMaxWidth(),
-
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex.value]),
+                    color = darkBlue // 원하는 색상으로 변경
+                )
+            }
             ) {
             tabs.forEachIndexed { index, tab ->
                 Tab(
@@ -119,21 +129,20 @@ fun UserInfoScreen(
     val context = LocalContext.current
     val user by friendViewModel.user.collectAsState()
     val friendCheck by friendViewModel.friendExist.collectAsState()
+    val requestCheck by friendViewModel.requestExist.collectAsState()
     val notices by friendViewModel.notices.collectAsState()
+
 
     var showDetailNotice by remember { mutableStateOf(false)}
     var selectedNoticeId by remember { mutableStateOf<Long?>(null)}
 
-    friendViewModel.loadUserInfo(userEmail!!)
-    //friendViewModel.fetchNotices()
-    //후보 1
-    Log.d("read user notice22", "success: email : ${userEmail} notices loaded")
-    friendViewModel.readFriendNotice(userEmail) //후보2
+    var isFriendRequestSend by remember { mutableStateOf(false)}
 
-    /*
-    LaunchedEffect(userEmail) {
-        friendViewModel.readFriendNotice(userEmail)
-    }*/
+
+    friendViewModel.loadUserInfo(userEmail!!)
+    friendViewModel.readFriendNotice(userEmail)
+
+    Log.d("read user notice22", "success: email : ${userEmail} notices loaded")
 
 
     //room
@@ -149,11 +158,14 @@ fun UserInfoScreen(
     }
 
     if(showDetailNotice && selectedNoticeId != null){
+        var tempoId = selectedNoticeId
         UserNoticeDetailScreen(
             navController = navController,
-            noticeId = selectedNoticeId,
+            //noticeId = selectedNoticeId,
+            noticeId = tempoId,
             friendViewModel = friendViewModel
         )
+
     } else {
         if(userEmail == null){
             Text("Error : User Email is missing")
@@ -165,6 +177,7 @@ fun UserInfoScreen(
             if (userRoomEmail != null) {
                 Log.d("Load User Room3", "userEmail = $userRoomEmail")
                 friendViewModel.checkMyFriend(userRoomEmail!!, userEmail)
+                friendViewModel.checkRequest(userRoomEmail!!, userEmail)
             } else {
                 Log.d("Load User Room", "Failed")
             }
@@ -180,7 +193,7 @@ fun UserInfoScreen(
                     Log.d("UserInfoScreen", "User loaded: ${user?.userEmail}")
                     Text(text = "Profile")
                     Row {
-                        com.example.secretdiary.ui.setting.UserImage(
+                        UserImage(
                             imageUri = user?.userImgPath,
                             modifier = Modifier
                                 .padding(8.dp)
@@ -208,6 +221,7 @@ fun UserInfoScreen(
                     // 2) 검증이후에 대하여 -> 성공시 notice 나오게, 실패시 친구 요청 버튼
                     if(friendCheck == true){
                         Text("내 친구입니다.")
+
                         //friendViewModel.readFriendNotice(userEmail) //후보2
                         //notice 나오는 ui
                         RecyclerViewUserNoticeContent(friendViewModel = friendViewModel, navController = navController) { noticeId ->
@@ -215,17 +229,23 @@ fun UserInfoScreen(
                             showDetailNotice = true
                         }
                     } else {
-                        //친구 요청 버튼 ui
-                        Button(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            onClick = {
-                                friendViewModel.sendFriendRequest(userRoomEmail!!, userEmail)
-                        }) {
-                            Text("친구 요청")
+                        if(requestCheck == true){
+                            Text("친구 요청을 보냈습니다.")
+                        } else {
+                            //친구 요청 버튼 ui
+                            Button(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                onClick = {
+                                    friendViewModel.sendFriendRequest(userRoomEmail!!, userEmail)
+                                    isFriendRequestSend = true
+                                },
+                                enabled = !isFriendRequestSend
+                            ) {
+                                //Text("친구 요청")
+                                Text(if (isFriendRequestSend) "친구 요청을 보냈습니다" else "친구 요청")
+                            }
                         }
-
-
                     }
                 }
             }
@@ -258,22 +278,32 @@ fun RecyclerViewUserNoticeContent(
     }
 }
 
+
+/*
 @Composable
 fun UserNoticeDetailScreen(
     navController: NavHostController,
     noticeId: Long?,
     friendViewModel: FriendViewModel
 ){
+
     if(noticeId == null){
         Text("Error: Notice ID is missing")
         return
     }
 
+    Log.d("UserNoticeDetailScreen", "Fetching notice for ID: $noticeId")
+
+
     val noticeFlow = friendViewModel.getNoticeById(noticeId)
+    //val noticeFlow = friendViewModel.readDetailNotice(noticeId)
+    Log.d("UserNoticeDetailScreen", "Notice Flow: $noticeFlow")
     val notice by noticeFlow.collectAsState(initial = null)
-    Log.d("home screen", "RecyclerViewNoticeContent route = ${notice}")
+    Log.d("UserNoticeDetailScreen", "Notice: $notice")
+    Log.d("UserNoticeDetailScreen", "RecyclerViewNoticeContent notice Id route = ${noticeId}")
 
     val scrollState = rememberScrollState() //scroll
+
 
     notice?.let { safeNotice ->
         Column(
@@ -286,7 +316,67 @@ fun UserNoticeDetailScreen(
                     .fillMaxWidth()
                     .padding(bottom = 4.dp)
             )
+            Text(
+                text = "작성일자 : tempo",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
 
+            Divider(color = Color.Black, thickness = 1.dp)
+
+            NoticeImage(
+                notice = safeNotice,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.2f)
+            )
+
+            Divider(color = Color.Black, thickness = 1.dp)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = safeNotice.noticeText,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+        }
+    } ?: Text("Loading...")
+}*/
+
+@Composable
+fun UserNoticeDetailScreen(
+    navController: NavHostController,
+    noticeId: Long?,
+    friendViewModel: FriendViewModel
+){
+
+    if(noticeId == null){
+        Text("Error: Notice ID is missing")
+        return
+    }
+
+    Log.d("UserNoticeDetailScreen", "Fetching notice for ID: $noticeId")
+
+    friendViewModel.readDetailNotice(noticeId)
+
+    val detailNotice by friendViewModel.detailNotice.collectAsState()
+
+    val scrollState = rememberScrollState() //scroll
+
+
+    detailNotice?.let { safeNotice ->
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+        ) {
+            Text(
+                text = safeNotice.noticeTitle,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp)
+            )
             Text(
                 text = "작성일자 : tempo",
                 modifier = Modifier
