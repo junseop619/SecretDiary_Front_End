@@ -43,6 +43,12 @@ import com.example.secretdiary.ui.home.HomeScreen
 import com.example.secretdiary.ui.home.HomeViewModel
 
 import com.example.secretdiary.ui.home.NoticeDetailScreen
+import com.example.secretdiary.ui.security.JoinScreen
+import com.example.secretdiary.ui.security.LoginScreen
+import com.example.secretdiary.ui.security.LoginScreen2
+import com.example.secretdiary.ui.security.SecurityNav
+import com.example.secretdiary.ui.security.SecurityScreen
+import com.example.secretdiary.ui.security.SecurityViewModel
 import com.example.secretdiary.ui.setting.SettingFirstTabScreen
 import com.example.secretdiary.ui.setting.SettingScreen
 import com.example.secretdiary.ui.setting.SettingViewModel
@@ -67,8 +73,6 @@ fun MainTopAppBar(navController: NavHostController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     TopAppBar(
-
-        //title = { Text(text = "Secret Diary") },
         title = {
             Text(
                 text = when (currentRoute) {
@@ -132,17 +136,31 @@ fun MainTopAppBar(navController: NavHostController) {
     )
 }
 
+
+
 @Composable
-fun MainScreen(viewModel: ComponentViewModel) {
+fun MainScreen(
+    //navController: NavHostController,
+    viewModel: ComponentViewModel
+) {
     val navController = rememberNavController()
 
     val context = LocalContext.current
     val userDao = UserDatabase.getDatabase(context).userDao()
     val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { MainTopAppBar(navController = navController) },
+        topBar = {
+
+            if(currentRoute != "login2"){
+                MainTopAppBar(navController = navController)
+            }
+            //MainTopAppBar(navController = navController)
+                 },
         bottomBar = {
             MyBottomNavigation(
                 containerColor = mediumBlue,//Color.Red,
@@ -151,30 +169,87 @@ fun MainScreen(viewModel: ComponentViewModel) {
                 navController = navController
             )
         }
-    ) {
-        Box(modifier = Modifier.padding(it)) {
+    ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             MyNavHost(
                 navController = navController,
                 startDestination = BottomNavItem.Home.screenRoute,
                 usersRepository = usersRepository
             )
         }
+        /*
+        Box(modifier = Modifier.padding(it)) {
+            MyNavHost(
+                navController = navController,
+                startDestination = BottomNavItem.Home.screenRoute,
+                usersRepository = usersRepository
+            )
+        }*/
     }
 }
 
 @Composable
-private fun MyNavHost(
+fun MyNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     startDestination: String,
     usersRepository: UsersRepository
 ) {
+    val context = LocalContext.current
+
     NavHost(
         modifier = modifier,
         navController = navController,
         startDestination = startDestination
     ) {
+        //before login
+        composable(route = "security"){
+            SecurityScreen()
+        }
 
+
+        composable(route = SecurityNav.Join.title){
+            JoinScreen(
+                navController = navController,
+                //viewModel = SecurityViewModel(),
+                viewModel = SecurityViewModel(context, usersRepository),
+                modifier = Modifier
+                    .fillMaxSize()
+            )
+        }
+        composable(route = SecurityNav.Main.title){
+            MainScreen(
+                //viewModel = HomeViewModel()
+                //navController = navController,
+                viewModel = ComponentViewModel()
+            )
+        }
+
+
+        composable(route = SecurityNav.Login.title){
+            LoginScreen(
+                navController = navController,
+                //viewModel = SecurityViewModel(),
+                viewModel = SecurityViewModel(context, usersRepository),
+                modifier = Modifier
+                    .fillMaxSize()
+
+            )
+        }
+
+        composable(route = "login2"){
+            LoginScreen2(
+                navController = navController,
+                //viewModel = SecurityViewModel(),
+                viewModel = SecurityViewModel(context, usersRepository),
+                modifier = Modifier
+                    .fillMaxSize()
+
+            )
+        }
+
+
+        //after login
         composable(BottomNavItem.Home.screenRoute){
             HomeScreen(navController = navController, homeViewModel = HomeViewModel(usersRepository), componentViewModel = ComponentViewModel())
         }
@@ -258,6 +333,8 @@ private fun MyNavHost(
         }
     }
 }
+
+
 
 @Composable
 private fun MyBottomNavigation(

@@ -39,6 +39,8 @@ interface SecretDiaryAPI {
     @POST("security/autoLogin")
     suspend fun autoLogin(@Header("Authorization") token: String): Response<Void>
 
+    @POST("security/logout")
+    suspend fun logout(@Header("Authorization") token: String): Response<Void>
 
 
     @Multipart

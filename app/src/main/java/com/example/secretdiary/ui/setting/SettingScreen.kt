@@ -49,6 +49,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.example.secretdiary.BuildConfig
@@ -58,6 +59,9 @@ import com.example.secretdiary.di.room.repository.OfflineUsersRepository
 import com.example.secretdiary.di.room.repository.UsersRepository
 import com.example.secretdiary.ui.components.ComponentViewModel
 import com.example.secretdiary.ui.home.ListItemButton
+import com.example.secretdiary.ui.security.SecurityNav
+import com.example.secretdiary.ui.security.SecurityScreen
+import com.example.secretdiary.ui.security.SecurityViewModel
 import com.example.secretdiary.ui.theme.darkBlue
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
@@ -207,7 +211,7 @@ fun SettingScreen(
     }
 
     if(showLogOutDialog){
-        LogOutDialog(settingViewModel,onDismiss = {showLogOutDialog = false})
+        LogOutDialog(settingViewModel,onDismiss = {showLogOutDialog = false}, navController = navController)
     }
 
     if(showDeleteUserDialog){
@@ -407,9 +411,14 @@ fun VersionInfoDialog(onDismiss: () -> Unit) {
 @Composable
 fun LogOutDialog(
     settingViewModel: SettingViewModel,
+    navController: NavHostController,
     onDismiss: () -> Unit
 ) {
     var version = BuildConfig.VERSION_NAME
+    val context = LocalContext.current
+
+    val userDao = UserDatabase.getDatabase(context).userDao()
+    val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
 
     androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
         Box(
@@ -431,8 +440,18 @@ fun LogOutDialog(
                 ) {
                     Button(
                         onClick = {
-                            settingViewModel.logout()
+                            settingViewModel.logout(context)
                             onDismiss()
+                            SecurityViewModel(context,usersRepository).resetResult()
+
+                            navController.navigate("security") {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                launchSingleTop = true
+                            }
+
+
+
+
                         }
                     ) {
                         Text("   예   ")

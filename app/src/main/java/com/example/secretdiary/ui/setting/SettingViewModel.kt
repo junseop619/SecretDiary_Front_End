@@ -11,7 +11,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.secretdiary.di.SecretDiaryObject
 import com.example.secretdiary.di.model.user.RUserModel
 import com.example.secretdiary.di.room.repository.UsersRepository
+import com.example.secretdiary.ui.security.SecurityViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -129,8 +131,26 @@ class SettingViewModel @Inject constructor(
         }
     }
 
-    fun logout(){
+    fun logout(context: Context){
+        val sharedPreferences = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        val token = sharedPreferences.getString("jwt_token", null)
 
+        if(token != null){
+            viewModelScope.launch(Dispatchers.IO) {
+                val response = SecretDiaryObject.getRetrofitSDService.logout(token)
+                if(response.isSuccessful){
+                    Log.d("Logout", "서버 로그아웃 성공")
+
+                    //토큰 삭제
+                    sharedPreferences.edit().remove("jwt_token").apply()
+                    Log.d("Logout", "토큰이 삭제되었습니다.")
+                } else {
+                    Log.e("Logout", "Logout")
+                }
+            }
+        } else {
+            Log.d("Logout", "토큰이 없습니다.")
+        }
     }
 
     fun deleteUser(){
