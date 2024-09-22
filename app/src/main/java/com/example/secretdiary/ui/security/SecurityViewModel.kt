@@ -43,6 +43,9 @@ class SecurityViewModel @Inject constructor(
     private val result = MutableStateFlow<Boolean?>(null)
     val requestResult : StateFlow<Boolean?> = result
 
+    private val _tokenResult = MutableStateFlow<Boolean?>(null)
+    val tokenResult : StateFlow<Boolean?> = _tokenResult
+
     var alertMessage: String? by mutableStateOf(null)
 
     init {
@@ -112,11 +115,13 @@ class SecurityViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val response = SecretDiaryObject.getRetrofitSDService.autoLogin(token)
             if(response.isSuccessful){
-                Log.d("auto login", "success")
+                Log.d("auto login", "validation success")
                 result.value = true
+                //_tokenResult.value = true
             } else {
                 Log.e("auto login", "Token validation failed, prompting user to login.")
                 result.value = false
+                //_tokenResult.value = false
             }
         }
     }
@@ -133,6 +138,7 @@ class SecurityViewModel @Inject constructor(
             validationToken(token)
         } else {
             Log.d("auto login","token is null")
+            _tokenResult.value = false
         }
     }
 
