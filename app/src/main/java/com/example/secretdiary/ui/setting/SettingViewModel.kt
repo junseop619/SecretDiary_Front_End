@@ -137,19 +137,28 @@ class SettingViewModel @Inject constructor(
 
         if(token != null){
             viewModelScope.launch(Dispatchers.IO) {
-                val response = SecretDiaryObject.getRetrofitSDService.logout(token)
+
+                //val response = SecretDiaryObject.getRetrofitSDService.logout("Bearer " + token)
+                val response = SecretDiaryObject.getRetrofitSDService.logout("Bearer $token")
+
+                val allEntries = sharedPreferences.all
+                for ((key, value) in allEntries) {
+                    Log.d("auto SharedPreferences", "$key: $value")
+                }
+                Log.d("auto ", "Token : $token")
+
                 if(response.isSuccessful){
-                    Log.d("Logout", "서버 로그아웃 성공")
+                    Log.d("auto Logout", "서버 로그아웃 성공")
 
                     //토큰 삭제
                     sharedPreferences.edit().remove("jwt_token").apply()
-                    Log.d("Logout", "토큰이 삭제되었습니다.")
+                    Log.d("auto Logout", "토큰이 삭제되었습니다.")
                 } else {
-                    Log.e("Logout", "Logout")
+                    Log.e("auto Logout", "Logout 실패: ${response.code()} - ${response.message()}")
                 }
             }
         } else {
-            Log.d("Logout", "토큰이 없습니다.")
+            Log.d("auto Logout", "토큰이 없습니다.")
         }
     }
 

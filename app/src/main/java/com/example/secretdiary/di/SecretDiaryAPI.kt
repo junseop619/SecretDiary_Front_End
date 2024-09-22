@@ -27,12 +27,6 @@ interface SecretDiaryAPI {
     @POST("security/join") //client ->db
     suspend fun joinUser(@Body userModel: UserModel) : Response<Void>
 
-
-    /*
-    @POST("security/login")
-    suspend fun loginUser(@Body loginModel: LoginModel): Response<Void>
-    */
-
     @POST("security/login")
     suspend fun loginUser(@Body loginModel: LoginModel): Response<String>
 
@@ -40,7 +34,7 @@ interface SecretDiaryAPI {
     suspend fun autoLogin(@Header("Authorization") token: String): Response<Void>
 
     @POST("security/logout")
-    suspend fun logout(@Header("Authorization") token: String): Response<Void>
+    suspend fun logout(@Header("Authorization") token: String): Response<String>
 
 
     @Multipart

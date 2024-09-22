@@ -59,7 +59,6 @@ import com.example.secretdiary.di.room.repository.OfflineUsersRepository
 import com.example.secretdiary.di.room.repository.UsersRepository
 import com.example.secretdiary.ui.components.ComponentViewModel
 import com.example.secretdiary.ui.home.ListItemButton
-import com.example.secretdiary.ui.security.SecurityNav
 import com.example.secretdiary.ui.security.SecurityScreen
 import com.example.secretdiary.ui.security.SecurityViewModel
 import com.example.secretdiary.ui.theme.darkBlue
@@ -444,7 +443,7 @@ fun LogOutDialog(
                             onDismiss()
                             SecurityViewModel(context,usersRepository).resetResult()
 
-                            navController.navigate("security") {
+                            navController.navigate("securityNav") {
                                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
                                 launchSingleTop = true
                             }
