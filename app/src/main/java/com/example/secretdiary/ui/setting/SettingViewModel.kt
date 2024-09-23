@@ -39,10 +39,6 @@ class SettingViewModel @Inject constructor(
     var userText : String by mutableStateOf("")
     var imageUri by mutableStateOf<Uri?>(null)
 
-    /*
-    private val _user = MutableStateFlow<RUserModel?>(null)
-    val user: StateFlow<RUserModel?> = _user */
-
     private val _user = MutableStateFlow<RUserModel?>(null)
     val user: StateFlow<RUserModel?> = _user
 
@@ -71,34 +67,6 @@ class SettingViewModel @Inject constructor(
             })
         }
     }
-
-
-    /*
-    fun loadUserInfo(userEmail: String) {
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val call = SecretDiaryObject.getRetrofitSDService.userInfo(userEmail)
-            call.enqueue(object: Callback<RUserModel>{
-                override fun onResponse(call: Call<RUserModel>, response: Response<RUserModel>){
-                    if(response.isSuccessful){
-                        response.body()?.let {
-                            _user.value = it
-
-                            Log.d("Load User viewModel", "success")
-                            Log.d("Load User viewModel", it.userNickName)
-                        }
-                    } else {
-                        val errorBody = response.errorBody()?.string()
-                        val statusCode = response.code()
-                        Log.d("Load User", "Failed: StatusCode = $statusCode, Error = $errorBody")
-                    }
-                }
-                override fun onFailure(call: Call<RUserModel>, t: Throwable){
-                    Log.e("Load User", "Network request failed", t)
-                }
-            })
-        }
-    }*/
 
     fun updateUser(context: Context){
 
@@ -137,19 +105,28 @@ class SettingViewModel @Inject constructor(
 
         if(token != null){
             viewModelScope.launch(Dispatchers.IO) {
-                val response = SecretDiaryObject.getRetrofitSDService.logout(token)
+
+                //val response = SecretDiaryObject.getRetrofitSDService.logout("Bearer " + token)
+                val response = SecretDiaryObject.getRetrofitSDService.logout("Bearer $token")
+
+                val allEntries = sharedPreferences.all
+                for ((key, value) in allEntries) {
+                    Log.d("auto SharedPreferences", "$key: $value")
+                }
+                Log.d("auto ", "Token : $token")
+
                 if(response.isSuccessful){
-                    Log.d("Logout", "서버 로그아웃 성공")
+                    Log.d("auto Logout", "서버 로그아웃 성공")
 
                     //토큰 삭제
                     sharedPreferences.edit().remove("jwt_token").apply()
-                    Log.d("Logout", "토큰이 삭제되었습니다.")
+                    Log.d("auto Logout", "토큰이 삭제되었습니다.")
                 } else {
-                    Log.e("Logout", "Logout")
+                    Log.e("auto Logout", "Logout 실패: ${response.code()} - ${response.message()}")
                 }
             }
         } else {
-            Log.d("Logout", "토큰이 없습니다.")
+            Log.d("auto Logout", "토큰이 없습니다.")
         }
     }
 

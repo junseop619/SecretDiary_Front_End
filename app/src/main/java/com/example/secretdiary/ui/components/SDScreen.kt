@@ -1,5 +1,7 @@
 package com.example.secretdiary.ui.components
 
+
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +12,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,10 +28,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.secretdiary.di.room.UserDatabase
 import com.example.secretdiary.di.room.repository.OfflineUsersRepository
 import com.example.secretdiary.di.room.repository.UsersRepository
+import com.example.secretdiary.ui.security.SecurityViewModel
 import com.example.secretdiary.ui.theme.lightBlue
 import com.example.secretdiary.ui.theme.mediumBlue
 
 @Composable
+fun SDScreen(
+    viewModel: SecurityViewModel
+) {
 fun SDScreen() {
     val navController = rememberNavController()
 
@@ -37,6 +45,23 @@ fun SDScreen() {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val requestResult by viewModel.requestResult.collectAsState()
+
+
+
+    LaunchedEffect(Unit) {
+        viewModel.autoLogin()
+    }
+
+    LaunchedEffect(requestResult) {
+        if(requestResult == true){
+            navController.navigate("myNav")
+            viewModel.resetResult()
+        } else if(requestResult == false){
+            viewModel.resetResult()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),

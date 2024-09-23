@@ -30,8 +30,6 @@ class SecurityViewModel @Inject constructor(
     private val userRepository: UsersRepository
 ) : ViewModel() {
 
-    //constructor() : this(OfflineUsersRepository(UserDatabase.getDatabase().userDao()))
-
     var id: String by mutableStateOf("")
     var email: String by mutableStateOf("")
     var password: String by mutableStateOf("")
@@ -43,11 +41,11 @@ class SecurityViewModel @Inject constructor(
     private val result = MutableStateFlow<Boolean?>(null)
     val requestResult : StateFlow<Boolean?> = result
 
+    private val _tokenResult = MutableStateFlow<Boolean?>(null)
+    val tokenResult : StateFlow<Boolean?> = _tokenResult
+
     var alertMessage: String? by mutableStateOf(null)
 
-    init {
-        //autoLogin()
-    }
 
     fun resetResult(){
         result.value = null
@@ -62,8 +60,6 @@ class SecurityViewModel @Inject constructor(
 
 
         var roomEmail : String?
-        //val userDao = UserDatabase.getDatabase(context).userDao()
-        //val usersRepository : UsersRepository = OfflineUsersRepository(userDao)
 
         val model = LoginModel(loginEmail, loginPassword)
         viewModelScope.launch(Dispatchers.IO) {
@@ -112,11 +108,13 @@ class SecurityViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val response = SecretDiaryObject.getRetrofitSDService.autoLogin(token)
             if(response.isSuccessful){
-                Log.d("auto login", "success")
+                Log.d("auto login", "validation success")
                 result.value = true
+                //_tokenResult.value = true
             } else {
                 Log.e("auto login", "Token validation failed, prompting user to login.")
                 result.value = false
+                //_tokenResult.value = false
             }
         }
     }
@@ -133,6 +131,7 @@ class SecurityViewModel @Inject constructor(
             validationToken(token)
         } else {
             Log.d("auto login","token is null")
+            _tokenResult.value = false
         }
     }
 
