@@ -1,8 +1,6 @@
 package com.example.secretdiary.ui.security
 
-import android.graphics.Paint.Join
 import android.util.Log
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,12 +38,6 @@ fun SecurityScreen(navController: NavHostController) {
     val context = LocalContext.current
     val userDao = UserDatabase.getDatabase(context).userDao()
     val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
-
-
-    LaunchedEffect(Unit) {
-        //securityViewModel.autoLogin()
-        //navController.navigate("login2")
-    }
 
     Scaffold() {
         Box(modifier = Modifier

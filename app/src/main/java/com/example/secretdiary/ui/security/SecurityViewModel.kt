@@ -30,8 +30,6 @@ class SecurityViewModel @Inject constructor(
     private val userRepository: UsersRepository
 ) : ViewModel() {
 
-    //constructor() : this(OfflineUsersRepository(UserDatabase.getDatabase().userDao()))
-
     var id: String by mutableStateOf("")
     var email: String by mutableStateOf("")
     var password: String by mutableStateOf("")
@@ -48,9 +46,6 @@ class SecurityViewModel @Inject constructor(
 
     var alertMessage: String? by mutableStateOf(null)
 
-    init {
-        //autoLogin()
-    }
 
     fun resetResult(){
         result.value = null
@@ -65,8 +60,6 @@ class SecurityViewModel @Inject constructor(
 
 
         var roomEmail : String?
-        //val userDao = UserDatabase.getDatabase(context).userDao()
-        //val usersRepository : UsersRepository = OfflineUsersRepository(userDao)
 
         val model = LoginModel(loginEmail, loginPassword)
         viewModelScope.launch(Dispatchers.IO) {
