@@ -39,10 +39,6 @@ class SettingViewModel @Inject constructor(
     var userText : String by mutableStateOf("")
     var imageUri by mutableStateOf<Uri?>(null)
 
-    /*
-    private val _user = MutableStateFlow<RUserModel?>(null)
-    val user: StateFlow<RUserModel?> = _user */
-
     private val _user = MutableStateFlow<RUserModel?>(null)
     val user: StateFlow<RUserModel?> = _user
 
@@ -71,34 +67,6 @@ class SettingViewModel @Inject constructor(
             })
         }
     }
-
-
-    /*
-    fun loadUserInfo(userEmail: String) {
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val call = SecretDiaryObject.getRetrofitSDService.userInfo(userEmail)
-            call.enqueue(object: Callback<RUserModel>{
-                override fun onResponse(call: Call<RUserModel>, response: Response<RUserModel>){
-                    if(response.isSuccessful){
-                        response.body()?.let {
-                            _user.value = it
-
-                            Log.d("Load User viewModel", "success")
-                            Log.d("Load User viewModel", it.userNickName)
-                        }
-                    } else {
-                        val errorBody = response.errorBody()?.string()
-                        val statusCode = response.code()
-                        Log.d("Load User", "Failed: StatusCode = $statusCode, Error = $errorBody")
-                    }
-                }
-                override fun onFailure(call: Call<RUserModel>, t: Throwable){
-                    Log.e("Load User", "Network request failed", t)
-                }
-            })
-        }
-    }*/
 
     fun updateUser(context: Context){
 
