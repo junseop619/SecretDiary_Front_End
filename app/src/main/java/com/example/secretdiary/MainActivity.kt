@@ -11,6 +11,7 @@ import com.example.secretdiary.di.room.repository.OfflineUsersRepository
 import com.example.secretdiary.di.room.repository.UsersRepository
 import com.example.secretdiary.ui.components.SDScreen
 import com.example.secretdiary.ui.components.SDScreen
+import com.example.secretdiary.ui.security.SecurityViewModel
 import com.example.secretdiary.ui.theme.SecretDiaryTheme
 import dagger.hilt.android.AndroidEntryPoint
 
