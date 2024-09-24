@@ -214,7 +214,7 @@ fun SettingScreen(
     }
 
     if(showDeleteUserDialog){
-        DeleteUserDialog(settingViewModel,onDismiss = {showDeleteUserDialog = false})
+        DeleteUserDialog(settingViewModel,onDismiss = {showDeleteUserDialog = false}, navController = navController)
     }
 }
 
@@ -470,9 +470,24 @@ fun LogOutDialog(
 @Composable
 fun DeleteUserDialog(
     settingViewModel: SettingViewModel,
+    navController: NavHostController,
     onDismiss: () -> Unit
 ) {
     var version = BuildConfig.VERSION_NAME
+
+    val context = LocalContext.current
+
+    var userRoomEmail by remember { mutableStateOf<String?>(null) }
+
+    val userDao = UserDatabase.getDatabase(context).userDao()
+    val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
+
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            userRoomEmail = usersRepository.getMostRecentUserName()
+        }
+    }
+
 
     androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
         Box(
@@ -494,8 +509,15 @@ fun DeleteUserDialog(
                 ) {
                     Button(
                         onClick = {
-                            settingViewModel.deleteUser()
+                            settingViewModel.logout(context)
+                            Log.d("delete","email = ${userRoomEmail}")
+                            settingViewModel.deleteUser(context, userRoomEmail!!)
                             onDismiss()
+                            SecurityViewModel(context,usersRepository).resetResult()
+                            navController.navigate("securityNav") {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                launchSingleTop = true
+                            }
                         }
                     ) {
                         Text("   예   ")

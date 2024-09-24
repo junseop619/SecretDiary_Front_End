@@ -36,7 +36,6 @@ import com.example.secretdiary.ui.theme.mediumBlue
 fun SDScreen(
     viewModel: SecurityViewModel
 ) {
-fun SDScreen() {
     val navController = rememberNavController()
 
     val context = LocalContext.current
@@ -69,7 +68,7 @@ fun SDScreen() {
             if(currentRoute != "securityNav" && currentRoute != "login" && currentRoute != "join"){
                 MainTopAppBar(navController = navController)
             }
-                 },
+        },
         bottomBar = {
             MyBottomNavigation(
                 containerColor = mediumBlue,//Color.Red,
@@ -150,4 +149,4 @@ private fun MyBottomNavigation(
             }
         }
     }
-}
+    }

@@ -10,6 +10,7 @@ import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Headers
@@ -35,6 +36,9 @@ interface SecretDiaryAPI {
 
     @POST("security/logout")
     suspend fun logout(@Header("Authorization") token: String): Response<String>
+
+    @DELETE("delete/{userEmail}")
+    suspend fun deleteUser(/*@Header("Authorization") token: String, */@Path("userEmail") userEmail: String): Response<ResponseBody>
 
 
     @Multipart

@@ -39,11 +39,6 @@ fun SecurityScreen(navController: NavHostController) {
     val userDao = UserDatabase.getDatabase(context).userDao()
     val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
 
-    LaunchedEffect(Unit) {
-        //securityViewModel.autoLogin()
-        //navController.navigate("login2")
-    }
-
     Scaffold() {
         Box(modifier = Modifier
             .fillMaxSize()
