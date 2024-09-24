@@ -1,5 +1,6 @@
 package com.example.secretdiary.ui.components
 
+
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,7 @@ import com.example.secretdiary.ui.theme.mediumBlue
 fun SDScreen(
     viewModel: SecurityViewModel
 ) {
+fun SDScreen() {
     val navController = rememberNavController()
 
     val context = LocalContext.current
