@@ -130,8 +130,37 @@ class SettingViewModel @Inject constructor(
         }
     }
 
-    fun deleteUser(){
-        Log.d("delete","delete")
+    fun deleteUser(context: Context, userEmail: String){
+        val sharedPreferences = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        val token = sharedPreferences.getString("jwt_token", null)
+
+        viewModelScope.launch(Dispatchers.IO) {
+            //val response = SecretDiaryObject.getRetrofitSDService.deleteUser("Bearer $token" ,userEmail)
+            val response = SecretDiaryObject.getRetrofitSDService.deleteUser(userEmail)
+            if(response.isSuccessful){
+                //sharedPreferences.edit().remove("jwt_token").apply()
+                Log.d("delete","success")
+            } else {
+                //eLog.d("delete","failed")
+                Log.d("delete", "Request URL: delete/$userEmail")
+
+                Log.e("delete", "delete 실패: ${response.code()} - ${response.message()}")
+            }
+        }
+        /*
+        if(token != null){
+            viewModelScope.launch(Dispatchers.IO) {
+                val response = SecretDiaryObject.getRetrofitSDService.deleteUser("Bearer $token" ,userEmail)
+                if(response.isSuccessful){
+                    sharedPreferences.edit().remove("jwt_token").apply()
+                    Log.d("delete","success")
+                } else {
+                    Log.d("delete","failed")
+                }
+            }
+        } else {
+            Log.d("delete","failed")
+        }*/
     }
 
 
