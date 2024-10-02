@@ -98,31 +98,6 @@ class FriendViewModel @Inject constructor(
         }
     }
 
-    fun fetchNotices() {
-        viewModelScope.launch {
-            val call = SecretDiaryObject.getRetrofitSDService.readAll()
-            call.enqueue(object: Callback<List<RNoticeModel>>{
-                override fun onResponse(call: Call<List<RNoticeModel>>, response: Response<List<RNoticeModel>>) {
-                    if(response.isSuccessful){
-                        response.body()?.let {
-                            _notices.value = it
-                            Log.d("read", "success")
-                        } ?: Log.d("read", "Response body is null")
-
-
-                    } else {
-                        Log.d("read", "Response is not successful. Status code: ${response.code()}, Message: ${response.message()}")
-                        response.errorBody()?.let {
-                            Log.d("read", "Error body: ${it.string()}")
-                        }
-                    }
-                }
-                override fun onFailure(call: Call<List<RNoticeModel>>, t: Throwable){
-                    Log.e("read", "Network request failed", t)
-                }
-            })
-        }
-    }
 
     fun onSearchQueryChange(keyword: String){
         searchQuery.value = keyword
@@ -137,27 +112,16 @@ class FriendViewModel @Inject constructor(
     fun searchUser(keyword: String){
         viewModelScope.launch(Dispatchers.IO) {
             val userEmail = userRepository.getMostRecentUserName()
-            val call = SecretDiaryObject.getRetrofitSDService.searchUser2(keyword, userEmail!!) //searchUser
-            call.enqueue(object: Callback<List<RUserModel>> {
-                override fun onResponse(call: Call<List<RUserModel>>, response: Response<List<RUserModel>>) {
-                    if(response.isSuccessful){
-                        response.body()?.let {
-                            _searchResults2.value = it
-                            Log.d("search_read", "success")
-                        } ?: Log.d("search_read", "Response body is null")
-
-
-                    } else {
-                        Log.d("search_read", "Response is not successful. Status code: ${response.code()}, Message: ${response.message()}")
-                        response.errorBody()?.let {
-                            Log.d("search_read", "Error body: ${it.string()}")
-                        }
-                    }
+            val response = SecretDiaryObject.getRetrofitSDService.searchUser(keyword, userEmail!!)
+            if(response.isSuccessful){
+                response.body()?.let {
+                    _searchResults2.value = it
                 }
-                override fun onFailure(call: Call<List<RUserModel>>, t: Throwable){
-                    Log.e("search_read", "Network request failed", t)
-                }
-            })
+            }else{
+                val errorBody = response.errorBody()?.string()
+                val statusCode = response.code()
+                Log.d("Search_read", "Failed: StatusCode = $statusCode, Error = $errorBody")
+            }
         }
     }
 
@@ -174,57 +138,42 @@ class FriendViewModel @Inject constructor(
         }
     }
 
+
     fun loadUserInfo(userEmail: String){
         viewModelScope.launch(Dispatchers.IO) {
-            val call = SecretDiaryObject.getRetrofitSDService.userInfo(userEmail)
-            call.enqueue(object : Callback<RUserModel> {
-                override fun onResponse(call: Call<RUserModel>, response: Response<RUserModel>) {
-                    if (response.isSuccessful) {
-                        response.body()?.let {
-                            _user.value = it
-                            Log.d("Load User viewModel", "success")
-                            Log.d("Load User viewModel", it.userNickName)
-                        }
-                    } else {
-                        val errorBody = response.errorBody()?.string()
-                        val statusCode = response.code()
-                        Log.d("Load User", "Failed: StatusCode = $statusCode, Error = $errorBody")
+            val response = SecretDiaryObject.getRetrofitSDService.userInfo(userEmail)
+            if(response.isSuccessful){
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        _user.value = it
                     }
                 }
-
-                override fun onFailure(call: Call<RUserModel>, t: Throwable) {
-                    Log.e("Load User", "Network request failed", t)
-                }
-            })
+            }else{
+                val errorBody = response.errorBody()?.string()
+                val statusCode = response.code()
+                Log.d("Load User", "Failed: StatusCode = $statusCode, Error = $errorBody")
+            }
         }
     }
 
     //친구 검증
     fun checkMyFriend(userEmail: String, friendEmail: String){
         viewModelScope.launch(Dispatchers.IO) {
-            val call = SecretDiaryObject.getRetrofitSDService.checkFriend(userEmail, friendEmail)
-            call.enqueue(object : Callback<Boolean> {
-                override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                    if (response.isSuccessful) {
-                        response.body()?.let {
-                            _friendExist.value = it
-                            Log.d("check friend", "success")
-                        }
-                    } else {
-                        val errorBody = response.errorBody()?.string()
-                        val statusCode = response.code()
-                        Log.d("check friend", "Failed: StatusCode = $statusCode, Error = $errorBody")
-                    }
+            val response = SecretDiaryObject.getRetrofitSDService.checkFriend(userEmail, friendEmail)
+            if(response.isSuccessful){
+                response.body()?.let {
+                    _friendExist.value = it
                 }
-
-                override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                    Log.e("check friend", "Network request failed", t)
-                }
-            })
+            }else{
+                val errorBody = response.errorBody()?.string()
+                val statusCode = response.code()
+                Log.d("check friend", "Failed: StatusCode = $statusCode, Error = $errorBody")
+            }
         }
     }
 
     //친구요청 검증
+    /*
     fun checkRequest(userEmail: String, friendEmail: String){
         viewModelScope.launch(Dispatchers.IO) {
             val call = SecretDiaryObject.getRetrofitSDService.checkRequest(userEmail, friendEmail)
@@ -247,7 +196,25 @@ class FriendViewModel @Inject constructor(
                 }
             })
         }
+    }*/
+
+    fun checkRequest(userEmail: String, friendEmail: String){
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = SecretDiaryObject.getRetrofitSDService.checkRequest(userEmail, friendEmail)
+            if (response.isSuccessful){
+                response.body()?.let {
+                    _requestExist.value = it
+                    Log.d("check request", "success")
+                }
+            }else{
+                val errorBody = response.errorBody()?.string()
+                val statusCode = response.code()
+                Log.d("check request", "Failed: StatusCode = $statusCode, Error = $errorBody")
+            }
+        }
     }
+
+
 
     //친구 요청기능
     fun sendFriendRequest(userEmail: String, friendEmail: String){
@@ -262,6 +229,7 @@ class FriendViewModel @Inject constructor(
     }
 
     //친구 요청 목록 보기
+    /*
     fun readFriendRequest(context: Context){
         viewModelScope.launch(Dispatchers.IO) {
             val userDao = UserDatabase.getDatabase(context).userDao()
@@ -291,6 +259,25 @@ class FriendViewModel @Inject constructor(
                 }
             })
         }
+    }*/
+
+    fun readFriendRequest(context: Context){
+        viewModelScope.launch(Dispatchers.IO) {
+            val userDao = UserDatabase.getDatabase(context).userDao()
+            val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
+
+            val userEmail = usersRepository.getMostRecentUserName()
+            val response = SecretDiaryObject.getRetrofitSDService.friendRequestList(userEmail!!)
+            if(response.isSuccessful){
+                response.body()?.let {
+                    _requestLists.value = it
+                }
+            }else{
+                val errorBody = response.errorBody()?.string()
+                val statusCode = response.code()
+                Log.d("read friend request", "Failed: StatusCode = $statusCode, Error = $errorBody")
+            }
+        }
     }
 
     //요청 수락 받기
@@ -319,60 +306,37 @@ class FriendViewModel @Inject constructor(
             val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
 
             val userEmail = usersRepository.getMostRecentUserName()
-
-            val call = SecretDiaryObject.getRetrofitSDService.getReadMyFriendList(userEmail!!)
-            call.enqueue(object: Callback<List<FriendModel>>{
-                override fun onResponse(call: Call<List<FriendModel>>, response: Response<List<FriendModel>>) {
-                    if(response.isSuccessful){
-                        response.body()?.let {
-                            //_requestLists.value = it
-                            _myFriends.value = it
-                            Log.d("read", "success")
-                        } ?: Log.d("read", "Response body is null")
-
-
-                    } else {
-                        Log.d("read", "Response is not successful. Status code: ${response.code()}, Message: ${response.message()}")
-                        response.errorBody()?.let {
-                            Log.d("read", "Error body: ${it.string()}")
-                        }
-                    }
+            val response = SecretDiaryObject.getRetrofitSDService.getReadMyFriendList(userEmail!!)
+            if(response.isSuccessful){
+                response.body()?.let {
+                    _myFriends.value = it
                 }
-                override fun onFailure(call: Call<List<FriendModel>>, t: Throwable){
-                    Log.e("read", "Network request failed", t)
-                }
-            })
+            }else{
+                val errorBody = response.errorBody()?.string()
+                val statusCode = response.code()
+                Log.d("readMyFirendList", "Failed: StatusCode = $statusCode, Error = $errorBody")
+            }
         }
     }
+
 
     fun readFriendNotice(userEmail: String){
         viewModelScope.launch(Dispatchers.IO) {
-            val call = SecretDiaryObject.getRetrofitSDService.readUserNotice(userEmail)
-            call.enqueue(object: Callback<List<RNoticeModel>>{
-                override fun onResponse(call: Call<List<RNoticeModel>>, response: Response<List<RNoticeModel>>) {
-                    if(response.isSuccessful){
-                        response.body()?.let {
-                            _notices.value = it
-                            Log.d("read user notice", "success: ${it.size} notices loaded")
-                            Log.d("read user notice", "success: email : ${userEmail} notices loaded")
-                        } ?: Log.d("read user notice", "Response body is null")
-
-
-                    } else {
-                        Log.d("read user notice", "Response is not successful. Status code: ${response.code()}, Message: ${response.message()}")
-                        response.errorBody()?.let {
-                            Log.d("read user notice", "Error body: ${it.string()}")
-                        }
-                    }
+            val response = SecretDiaryObject.getRetrofitSDService.readUserNotice(userEmail)
+            if(response.isSuccessful){
+                response.body()?.let {
+                    _notices.value = it
                 }
-                override fun onFailure(call: Call<List<RNoticeModel>>, t: Throwable){
-                    Log.e("read user notice", "Network request failed", t)
+            } else {
+                response.errorBody()?.let {
+                    Log.d("read user notice", "Error body: ${it.string()}")
                 }
-            })
+            }
         }
     }
 
 
+    /*
     fun refreshFriendRequests(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             val userDao = UserDatabase.getDatabase(context).userDao()
@@ -401,31 +365,39 @@ class FriendViewModel @Inject constructor(
                 }
             })
         }
+    }*/
+
+    fun refreshFriendRequests(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val userDao = UserDatabase.getDatabase(context).userDao()
+            val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
+
+            val userEmail = usersRepository.getMostRecentUserName()
+            val response = SecretDiaryObject.getRetrofitSDService.friendRequestList(userEmail!!)
+            if(response.isSuccessful){
+                response.body()?.let {
+                    _requestLists.value = it // 친구 요청 목록 갱신
+                }
+            }else{
+                val errorBody = response.errorBody()?.string()
+                val statusCode = response.code()
+                Log.d("refresh Friend Request", "Failed: StatusCode = $statusCode, Error = $errorBody")
+            }
+        }
     }
 
     fun readDetailNotice(noticeId: Long){
         viewModelScope.launch(Dispatchers.IO) {
-            val call = SecretDiaryObject.getRetrofitSDService.readDetailNotice(noticeId)
-            call.enqueue(object: Callback<RNoticeModel>{
-                override fun onResponse(call: Call<RNoticeModel>, response: Response<RNoticeModel>) {
-                    if(response.isSuccessful){
-                        response.body()?.let {
-                            _detailNotice.value = it
-                            Log.d("read user notice", "success:")
-                        } ?: Log.d("read user notice", "Response body is null")
-
-
-                    } else {
-                        Log.d("read user notice", "Response is not successful. Status code: ${response.code()}, Message: ${response.message()}")
-                        response.errorBody()?.let {
-                            Log.d("read user notice", "Error body: ${it.string()}")
-                        }
-                    }
+            val response = SecretDiaryObject.getRetrofitSDService.readDetailNotice(noticeId)
+            if(response.isSuccessful){
+                response.body()?.let {
+                    _detailNotice.value = it
                 }
-                override fun onFailure(call: Call<RNoticeModel>, t: Throwable){
-                    Log.e("read user notice", "Network request failed", t)
-                }
-            })
+            }else {
+                val errorBody = response.errorBody()?.string()
+                val statusCode = response.code()
+                Log.d("read User Notice", "Failed: StatusCode = $statusCode, Error = $errorBody")
+            }
         }
     }
 

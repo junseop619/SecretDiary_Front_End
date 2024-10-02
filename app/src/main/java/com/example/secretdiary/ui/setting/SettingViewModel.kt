@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.secretdiary.di.SecretDiaryObject
 import com.example.secretdiary.di.model.user.RUserModel
+import com.example.secretdiary.di.room.UserDatabase
+import com.example.secretdiary.di.room.repository.OfflineUsersRepository
 import com.example.secretdiary.di.room.repository.UsersRepository
 import com.example.secretdiary.ui.security.SecurityViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,6 +37,7 @@ class SettingViewModel @Inject constructor(
     private val userRepository: UsersRepository
 ) : ViewModel(){
 
+
     var userNickName : String by mutableStateOf("")
     var userText : String by mutableStateOf("")
     var imageUri by mutableStateOf<Uri?>(null)
@@ -45,26 +48,16 @@ class SettingViewModel @Inject constructor(
 
     fun loadUserInfo(userEmail: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val call = SecretDiaryObject.getRetrofitSDService.userInfo(userEmail)
-            call.enqueue(object : Callback<RUserModel> {
-                override fun onResponse(call: Call<RUserModel>, response: Response<RUserModel>) {
-                    if (response.isSuccessful) {
-                        response.body()?.let {
-                            _user.value = it
-                            Log.d("Load User viewModel", "success")
-                            Log.d("Load User viewModel", it.userNickName)
-                        }
-                    } else {
-                        val errorBody = response.errorBody()?.string()
-                        val statusCode = response.code()
-                        Log.d("Load User", "Failed: StatusCode = $statusCode, Error = $errorBody")
-                    }
+            val response = SecretDiaryObject.getRetrofitSDService.userInfo(userEmail)
+            if(response.isSuccessful){
+                response.body()?.let {
+                    _user.value = it
                 }
-
-                override fun onFailure(call: Call<RUserModel>, t: Throwable) {
-                    Log.e("Load User", "Network request failed", t)
-                }
-            })
+            }else{
+                val errorBody = response.errorBody()?.string()
+                val statusCode = response.code()
+                Log.d("Load User", "Failed: StatusCode = $statusCode, Error = $errorBody")
+            }
         }
     }
 
@@ -147,23 +140,5 @@ class SettingViewModel @Inject constructor(
                 Log.e("delete", "delete 실패: ${response.code()} - ${response.message()}")
             }
         }
-        /*
-        if(token != null){
-            viewModelScope.launch(Dispatchers.IO) {
-                val response = SecretDiaryObject.getRetrofitSDService.deleteUser("Bearer $token" ,userEmail)
-                if(response.isSuccessful){
-                    sharedPreferences.edit().remove("jwt_token").apply()
-                    Log.d("delete","success")
-                } else {
-                    Log.d("delete","failed")
-                }
-            }
-        } else {
-            Log.d("delete","failed")
-        }*/
     }
-
-
-
-
 }

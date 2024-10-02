@@ -106,13 +106,17 @@ class SecurityViewModel @Inject constructor(
     //validate token
     private fun validationToken(token: String){
         viewModelScope.launch(Dispatchers.IO) {
-            val response = SecretDiaryObject.getRetrofitSDService.autoLogin(token)
+            //val response = SecretDiaryObject.getRetrofitSDService.autoLogin(token)
+            val response = SecretDiaryObject.getRetrofitSDService.autoLogin("Bearer $token")
             if(response.isSuccessful){
                 Log.d("auto login", "validation success")
                 result.value = true
                 //_tokenResult.value = true
             } else {
+                val errorBody = response.errorBody()?.string()
+                val statusCode = response.code()
                 Log.e("auto login", "Token validation failed, prompting user to login.")
+                Log.d("auto login", "Failed: StatusCode = $statusCode, Error = $errorBody")
                 result.value = false
                 //_tokenResult.value = false
             }

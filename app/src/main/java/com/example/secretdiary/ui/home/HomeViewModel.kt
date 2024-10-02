@@ -53,9 +53,6 @@ class HomeViewModel @Inject constructor(
     val searchResults: StateFlow<List<RNoticeModel>> = _searchResults
     private val searchQuery = MutableStateFlow("")
 
-    // 추가된 로딩 상태
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading
 
     init {
         readMyNotice()
@@ -79,28 +76,19 @@ class HomeViewModel @Inject constructor(
         searchQuery.value = keyword
     }
 
+
     fun searchNotices(keyword: String){
         viewModelScope.launch {
-            val call = SecretDiaryObject.getRetrofitSDService.search2(keyword)
-            call.enqueue(object: Callback<List<RNoticeModel>>{
-                override fun onResponse(call: Call<List<RNoticeModel>>, response: Response<List<RNoticeModel>>) {
-                    if(response.isSuccessful){
-                        response.body()?.let {
-                            _searchResults.value = it
-                            Log.d("search_read", "success")
-                        } ?: Log.d("search_read", "Response body is null")
-
-                    } else {
-                        Log.d("search_read", "Response is not successful. Status code: ${response.code()}, Message: ${response.message()}")
-                        response.errorBody()?.let {
-                            Log.d("search_read", "Error body: ${it.string()}")
-                        }
-                    }
+            val response = SecretDiaryObject.getRetrofitSDService.searchNotice(keyword)
+            if(response.isSuccessful){
+                response.body()?.let {
+                    _searchResults.value = it
                 }
-                override fun onFailure(call: Call<List<RNoticeModel>>, t: Throwable){
-                    Log.e("search_read", "Network request failed", t)
-                }
-            })
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val statusCode = response.code()
+                Log.d("Search Notice", "Failed: StatusCode = $statusCode, Error = $errorBody")
+            }
         }
     }
 
@@ -147,32 +135,17 @@ class HomeViewModel @Inject constructor(
 
     fun readMyNotice(){
         viewModelScope.launch(Dispatchers.IO) {
-
             val userEmail = userRepository.getMostRecentUserName()
-
-            val call = SecretDiaryObject.getRetrofitSDService.readUserNotice(userEmail!!)
-            call.enqueue(object: Callback<List<RNoticeModel>>{
-                override fun onResponse(call: Call<List<RNoticeModel>>, response: Response<List<RNoticeModel>>) {
-                    if(response.isSuccessful){
-                        response.body()?.let {
-                            _notices.value = it
-                            Log.d("read user notice", "success")
-                            Log.d("date check", "viweModelDate = ${_notices.value}")
-                            Log.d("date check Raw Response", response.raw().toString())
-                        } ?: Log.d("read user notice", "Response body is null")
-
-
-                    } else {
-                        Log.d("read user notice", "Response is not successful. Status code: ${response.code()}, Message: ${response.message()}")
-                        response.errorBody()?.let {
-                            Log.d("read user notice", "Error body: ${it.string()}")
-                        }
-                    }
+            val response = SecretDiaryObject.getRetrofitSDService.readUserNotice(userEmail!!)
+            if(response.isSuccessful){
+                response.body()?.let {
+                    _notices.value = it
                 }
-                override fun onFailure(call: Call<List<RNoticeModel>>, t: Throwable){
-                    Log.e("read user notice", "Network request failed", t)
+            } else {
+                response.errorBody()?.let {
+                    Log.d("read user notice", "Error body: ${it.string()}")
                 }
-            })
+            }
         }
     }
 
