@@ -40,7 +40,6 @@ interface SecretDiaryAPI {
     @DELETE("delete/{userEmail}")
     suspend fun deleteUser(/*@Header("Authorization") token: String, */@Path("userEmail") userEmail: String): Response<ResponseBody>
 
-
     @Multipart
     @PUT("security/update/{userEmail}")
     suspend fun updateUser(
@@ -50,7 +49,7 @@ interface SecretDiaryAPI {
         @Part userImg: MultipartBody.Part
     ): Response<ResponseBody>
 
-    //단일 image notice
+
     @Multipart
     @POST("upload")
     suspend fun upload(
@@ -60,57 +59,40 @@ interface SecretDiaryAPI {
         @Part noticeImage: MultipartBody.Part
     ): Response<ResponseBody>
 
-    @GET("findAll2")
-    fun readAll(): Call<List<RNoticeModel>>
-
     @GET("read/notice/user")
-    fun readUserNotice(@Query("userEmail") query: String): Call<List<RNoticeModel>>
-
+    suspend fun readUserNotice(@Query("userEmail") query: String): Response<List<RNoticeModel>>
 
     @GET("search/notice")
-    fun search2(@Query("keyword") query: String): Call<List<RNoticeModel>>
+    suspend fun searchNotice(@Query("keyword") query: String): Response<List<RNoticeModel>>
 
     @GET("read/detail/notice")
-    fun readDetailNotice(@Query("noticeId") query: Long): Call<RNoticeModel>
-
+    suspend fun readDetailNotice(@Query("noticeId") query: Long): Response<RNoticeModel>
 
     @GET("security/user/{userEmail}")
-    fun userInfo(@Path("userEmail") userEmail: String): Call<RUserModel>
-
-
-    //friend
-    /*
-    @GET("search/{userEmail}/user")
-    fun searchUser(@Query("keyword") query: String,  userEmail: String): Call<List<RUserModel>>
-     */
+    suspend fun userInfo(@Path("userEmail") userEmail: String): Response<RUserModel>
 
     @GET("search/{keyword}/{userEmail}")
-    fun searchUser2(@Path("keyword") keyword: String,  @Path("userEmail") userEmail: String): Call<List<RUserModel>>
-
+    suspend fun searchUser(@Path("keyword") keyword: String,  @Path("userEmail") userEmail: String): Response<List<RUserModel>>
 
     @GET("friend/check/{userEmail}/{friendEmail}")
-    fun checkFriend(@Path("userEmail") userEmail: String, @Path("friendEmail") friendEmail: String): Call<Boolean>
+    suspend fun checkFriend(@Path("userEmail") userEmail: String, @Path("friendEmail") friendEmail: String): Response<Boolean>
 
     @GET("friend/request/check/{userEmail}/{friendEmail}")
-    fun checkRequest(@Path("userEmail") userEmail: String, @Path("friendEmail") friendEmail: String): Call<Boolean>
+    suspend fun checkRequest(@Path("userEmail") userEmail: String, @Path("friendEmail") friendEmail: String): Response<Boolean>
 
 
     @POST("friend/request/{userEmail}/{friendEmail}")
     suspend fun sendRequestFriend(@Path("userEmail") userEmail: String, @Path("friendEmail") friendEmail: String) : Response<Void>
 
+
     @GET("friend/request/list/{userEmail}")
-    fun friendRequestList(@Path("userEmail") userEmail: String): Call<List<FriendModel>>
+    suspend fun friendRequestList(@Path("userEmail") userEmail: String): Response<List<FriendModel>>
 
     @POST("friend/accept/{userEmail}/{friendEmail}")
     suspend fun acceptFriendRequest(@Path("userEmail") userEmail: String, @Path("friendEmail") friendEmail: String) : Response<Void>
 
+
     @GET("friend/my/{userEmail}")
-    fun getReadMyFriendList(@Path("userEmail") userEmail: String): Call<List<FriendModel>>
-
-    /*
-    @GET("security/user/{userEmail}")
-    suspend fun userInfo(@Path("userEmail") userEmail: String): Response<RUserModel>
-*/
-
+    suspend fun getReadMyFriendList(@Path("userEmail") userEmail: String): Response<List<FriendModel>>
 
 }

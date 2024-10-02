@@ -248,10 +248,30 @@ fun UpdateUserScreen(
     modifier: Modifier = Modifier
 ){
 
+
     //var == 가변
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     val context = LocalContext.current
+    val user by viewModel.user.collectAsState()
+    var userRoomEmail by remember { mutableStateOf<String?>(null) }
+
+
+    LaunchedEffect(Unit) {
+        val userDao = UserDatabase.getDatabase(context).userDao()
+        val usersRepository: UsersRepository = OfflineUsersRepository(userDao)
+
+        withContext(Dispatchers.IO) {
+            userRoomEmail = usersRepository.getMostRecentUserName()
+        }
+    }
+    if (userRoomEmail != null) {
+        Log.d("Load User Room3", "userEmail = $userRoomEmail")
+        viewModel.loadUserInfo(userRoomEmail!!)
+    } else {
+        //Toast.makeText(context, "최근 로그인한 사용자가 없습니다.", Toast.LENGTH_SHORT).show()
+        Log.d("Load User Room", "Failed")
+    }
 
     //val == 불변(final)
     val launcher = rememberLauncherForActivityResult(
@@ -283,7 +303,9 @@ fun UpdateUserScreen(
 
         Text(text = "소개말")
         TextField(
+            //value = user?.userText ?: viewModel.userText,
             value = viewModel.userText,
+            //value = "ssssss",
             onValueChange = { viewModel.userText = it },
             label = { Text("내용") },
             modifier = Modifier.fillMaxWidth()
