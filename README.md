@@ -173,7 +173,77 @@ LoginScreen에서 회원가입 버튼을 누르면 회원가입 역할을 하는
 
 ## 2-4. Home
 
+<img width="342" alt="스크린샷 2024-10-06 오후 11 30 53" src="https://github.com/user-attachments/assets/7de28fe4-b025-45ac-b779-572d3e244317">
+
+HomeScreen composable에는 상단바에 + 모양의 Icon을 눌러 AddNoticeScreen composable로 이동하여 게시물을 작성할 수 있습니다.
+
+상단바 아래에는 Search Notice로 게시물 검색 기능을 제공합니다.
+
+Home
+
+<br></br>
+
 > ## 2-4-1. Home Screen
+
+HomeScreen composable에는 상단바에 + 모양의 Icon을 눌러 AddNoticeScreen composable로 이동하여 게시물을 작성할 수 있습니다.
+
+상단바 아래에는 Search Notice로 게시물 검색 기능을 제공합니다.
+
+<img width="348" alt="스크린샷 2024-10-06 오후 11 35 23" src="https://github.com/user-attachments/assets/fc404fd8-90b2-4b7a-b8d9-97d1b63609ca">
+
+위 사진과 같이 해당 TextField에 text를 입력하면 해당 text에 대한 결과가 LazyColumn으로 나오게 됩니다.
+
+해당 검색기능에 대해서는 검색어 자동완성 기능을 제공하며 아래와 같이 
+
+<img width="363" alt="스크린샷 2024-10-06 오후 11 37 21" src="https://github.com/user-attachments/assets/c66cffeb-ba9e-4f4e-addc-34dbb9e9165b">
+
+해당 keyword와 유사한 notice를 LazyColumn에 결과로 제공합니다.
+
+* retrofit2를 이용한 게시물 읽어오기 기능에 관해서는 항목 --의 --을 참조 부탁드립니다.
+
+* 검색기능 및 검색어 자동완성에 대해서는 항목 --의 --을 참조 부탁드립니다.
+
+게시물 검색기능 아래로는 LazyColumn을 통해 게시물을 RecyclerView형식으로 자신이 작성한 게시물을 표시하게 됩니다.
+
+검색 결과로 나온 LazyColmn이나 Home 자체의 LazyColmn에 나온 notice에 대하여, 해당 notice를 터치하면 NoticeDetailScreen composable로 이동하게 됩니다.
+
+<br></br>
+
+> ## 2-4-2. Add Notice Screen
+
+Add Notice Screen의 경우 AddNoticeScreen composable로 구현하였습니다.
+
+위에서 언급했던바와 같이 HomeScreen composable의 상단 바 + 버튼을 통해 접근이 가능합니다.
+
+<img width="351" alt="스크린샷 2024-10-06 오후 11 43 03" src="https://github.com/user-attachments/assets/a39434b0-3d92-434a-b778-1f7a51481a96">
+
+해당 composable에서는 제목과 내용, 사진을 첨부할 수 있습니다. 사진을 첨부하게 되면 제한조건 text 하단의 +모양이 있는 이미지가 선택한 이미지로 바뀌게 됩니다.
+
+이후, 작성하기를 누르게 되면 retrofit2를 이용해 게시물이 Create되며 Spring을 이용하여 해당 게시물이 작성 시간과 함께 DB에 저장됩니다.
+
+* retrofit2를 이용한 Spring과 통신하여 CRUD를 구현하는 방법에 대해서는 ~ 를 참고 부탁드립니다.
+
+* android emulator에서 Image를 가져와 Spring을 이용해 DB에 저장하는 방법에 대해서는 ~ 를 참고 부탁드립니다.
+
+<br></br>
+
+> ## 2-4-3. Notice Detail Screen
+
+Notice Detail Screen의 경우 NoticeDetailScreen composable로 구현하였습니다.
+
+위에서 언급했던바와 같이 HomeScreen에 있는 LazyColumn으로 나오는 Notice들에 대하여 터치하면 접근하게 됩니다.
+
+<img width="340" alt="스크린샷 2024-10-06 오후 11 51 26" src="https://github.com/user-attachments/assets/531ddee8-edc6-4620-9bdc-97212c8fec8d">
+
+해당 화면에서는 등록할 때 저장했던 제목, 내용, 작성시간, 이미지가 나옵니다.
+
+AddNoticeScreen에서와 마찬가지로 retrofit2를 이용한 Read의 구현입니다.
+
+<br></br>
+
+## 2-5. Friend
+
+
 
 
 
