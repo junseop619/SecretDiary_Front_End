@@ -243,25 +243,55 @@ AddNoticeScreen에서와 마찬가지로 retrofit2를 이용한 Read의 구현�
 
 (Friend Screen img)
 
-ㅁㅁㅁㅁㅁㅁㅁㅁ
+Friend Screen의 경우 FriendScreen coomposable입니다.
+
+위 사진과 같이 FriendScreen에는 TabRow를 이용하여 2개의 내 친구(FriendFirstTab), 친구 추천(FriendSecondTab)으로 구성되어 있습니다.
 
 <br></br>
 
 > ## 2-5-1. Friend First Tab
 
-ㅁㅁㅁㅁㅁ
+(친구 2명정도 있고, 특정 친구 검색 결과로 나오는 모습 image)
+
+FriendFirstTab composable로 구성한 해당 tab의 경우 위 사진과 동일한 화면으로 bottomNavigation에서 Friend tab일 때의 기본 UI입니다.
+
+해당 tab에서의 검색 기능의 경우 현재 친구목록에서 이메일을 입력하면 해당 이메일에 해당하는 친구 정보를 표시해줍니다. 
+
+이 검색 기능 역시 검색어 Debounce와 Throttle을 이용한 자동완성 기능을 제공하고 있습니다.
+
+검색 영역 아래에는 내 친구 목록이라는 text가 있는데 해당 text 아래에는 LazyColumn을 이용하여 현재 친구 목록을 recyclerView 형식으로 보여줍니다. 
+
+검색결과로 나오거나 내 친구 목록으로 나온 ListItem을 클릭하게 되면 UserInfoScreen composable로 화면이 전환되며 해당 친구의 프로필 및 작성 게시물들을 확인 할 수 있습니다.
+
+UserInfoSceen의 경우 항목 2-5-3. User Info Screen에서 더욱 자세하게 다룰 예정입니다. 
 
 <br></br>
 
 > ## 2-5-2. Friend Second Tab
 
-ㅁㅁㅁㅁ
+(친구 요청 목록 1명 정도 있는 모습 image)
+
+FriendSecondTab composable로 구성된 tab입니다.
+
+해당 tab에서의 검색 기능의 경우 이메일을 입력하면 해당 이메일에 해당하는 모든 유저를 표시해줍니다.
+
+이 검색 기능 역시 검색어 Debounce와 Throttle을 이용한 자동완성 기능을 제공하고 있습니다.
+
+친구 요청 목록의 경우 역시 LazyColumn으로 설계되었으며 현재 본인에게 친구 요청한 유저를 보여주며 수락 버튼을 누르게 되면 해당 유저와 친구가 되고 요청목록에는 해당 요청이 삭제되고, tab1의 친구 목록에는 추가가 되는 시스템입니다.
+
+검색 결과로 나오거나 요청 목록으로 나온 ListItem을 클릭하게 되면 tab1과 같이  UserInfoScreen composable로 화면이 전환됩니다.
 
 <br></br>
 
 > ## 2-5-3. User Info Screen
 
-ㅁㅁㅁㅁㅁㅁ
+(친구가 아닐 경우, 친구일 경우 image 허나 notice를 포함하는)
+
+UserInfoScreen composable로 구성되어 있는 User Info Screen의 경우 위 friend의 각 tab에서 LazyColumn안에 있는 ListItem을 터치하면 나오는 UI입니다.
+
+해당 composable에서는 LaunchedEffect에 의해 해당 Composable이 구성되자 마자, Room을 이용해 현재 로그인한 유저의 email을 갖고 온 후 ListItem에서 선택한 유저의 email을 함께 parameter로 하여 1차적으로 친구 관계 여부를 파악하게 됩니다.
+
+친구관계일 경우 ~~~ 아닐경우 ~~~ 되며 
 
 <br></br>
 
