@@ -287,6 +287,9 @@ FriendSecondTab composable로 구성된 tab입니다.
 
 (친구가 아닐 경우, 친구일 경우 image 허나 notice를 포함하는)
 
+![준섭2](https://github.com/user-attachments/assets/21cb5175-7a80-41da-b78e-42832476dfc3)
+
+
 UserInfoScreen composable로 구성되어 있는 User Info Screen의 경우 위 friend의 각 tab에서 LazyColumn안에 있는 ListItem을 터치하면 나오는 UI입니다.
 
 해당 composable에서는 LaunchedEffect에 의해 해당 Composable이 구성되자 마자, Room을 이용해 현재 로그인한 유저의 email을 갖고 온 후 ListItem에서 선택한 유저의 email을 함께 parameter로 하여 1차적으로 친구 관계 여부를 파악하게 됩니다.
