@@ -285,10 +285,7 @@ FriendSecondTab composable로 구성된 tab입니다.
 
 > ## 2-5-3. User Info Screen
 
-(친구가 아닐 경우, 친구일 경우 image 허나 notice를 포함하는)
-
 ![준섭2](https://github.com/user-attachments/assets/21cb5175-7a80-41da-b78e-42832476dfc3)
-
 
 UserInfoScreen composable로 구성되어 있는 User Info Screen의 경우 위 friend의 각 tab에서 LazyColumn안에 있는 ListItem을 터치하면 나오는 UI입니다.
 
@@ -356,7 +353,7 @@ Update User Screen의 경우 SettingScreen.kt에 정의한 UpdateUserScreen comp
 
 > ## 2-6-4. 로그아웃, 회원 탈퇴
 
-(LogOutDialog, DeleteUerDialog 이미지 붙여서)
+![준섭1](https://github.com/user-attachments/assets/2de1db24-4614-47ce-bb0e-de4bfbea2071)
 
 로그아웃과 회원탈퇴 역시 remember, mutableStateOf를 이용해 UI상태를 관리하며 LogOutDialog, DeleteUserDialog를 이용해 Dialog창으로 UI를 구현하고 있습니다.
 
