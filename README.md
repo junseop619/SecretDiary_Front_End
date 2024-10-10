@@ -72,7 +72,7 @@
 
     3-7. Debounce & Throttle을 이용한 검색 기능 및 검색어 자동완성 기능 구현
 
-    3-8. 안드로이드에서 JWT를 이용한 자동 로그인 구현 
+    3-8. 안드로이드에서 JWT를 이용한 자동 로그인 및 로그아웃 구현 
 
 
 <br><br/>
@@ -294,13 +294,23 @@ UserInfoScreen composable로 구성되어 있는 User Info Screen의 경우 위 
 
 해당 composable에서는 LaunchedEffect에 의해 해당 Composable이 구성되자 마자, Room을 이용해 현재 로그인한 유저의 email을 갖고 온 후 ListItem에서 선택한 유저의 email을 함께 parameter로 하여 1차적으로 친구 관계 여부를 파악하게 됩니다.
 
-친구관계일 경우 ~~~ 아닐경우 ~~~ 되며 
+친구 관계 여부는 friendViewModel에 정의한 checkMyFriend method를 이용해 수행하게 됩니다.
+
+친구관계가 아닐 경우 해당 유저의 위 왼쪽 사진과 같이 해당 유저의 프로필과 친구 요청 버튼이 활성화되어있습니다. 해당 버튼을 누르게 되면, 해당 버튼이 비활성화 되며 상대방의 Friend Second tab의 친구 요청 목록에 해당 요청이 추가됩니다.
+
+(버튼 비활성화 되어있는 사진)
+
+만약 친구 관계일 경우 오른 위 오른쪽 사진과 같이 해당 유저의 프로필과 작성한 게시물이 LazyColumn형식으로 나오게 됩니다.
+
+해당 게시물을 터치하게 되면 다음 항목에서 설명할 User Notice Detail Screen으로 전환되게 됩니다. 
 
 <br></br>
 
 > ## 2-5-4. User Notice Detail Screen
 
-ㅁㅁㅁㅁㅁㅁㅁ
+User Notice Detail Screen의 경우 FriendScreen.kt에 정의한 UserNoticeDetailScreen composable에 의해 구성됩니다.
+
+해당 composable의 경우 항목 2-4-3. Notice Detail Screen과 별다른 차이점은 없으므로 추가적인 설명은 생략하겠습니다.
 
 <br></br>
 
@@ -310,25 +320,54 @@ UserInfoScreen composable로 구성되어 있는 User Info Screen의 경우 위 
 
 (setting Screen img)
 
-ㅁㅁㅁㅁㅁㅁ
+Setting Sreen의 경우 SettingScreen.kt에 정의한 SettingScreen composable에 의해 구성됩니다.
+
+Setting Screen의 상단에는 사용자의 프로필이 나오게 되고, 내 정보 수정하기 버튼을 눌러 다음 항목에서 설명 할 Update User Screen에 접근하여 내 정보를 수정 할 수 있습니다.
+
+Setting Screen에서 유저 정보가 나오는 원리는 Launched Effect를 이용하여 해당 composable이 구성되자마자 Launched Effect안에 감싸진 내용이 작동되게 하며,
+
+감싸져있는 Room method를 이용해 현재 로그인 한 유저의 정보를 받아와 settingViewModel에 정의한 loadUserInfo method를 이용해 해당 정보를 기반으로 Spring을 이용하여 유저 정보를 받아오게 됩니다.
+
+내 프로필 아래로는 LazyColumn을 이용하여 Secret Diary의 다양한 Service를 제옹하게 됩니다.
+
+버전 정보, 로그아웃, 회원 탈퇴기능을 제공하는데 해당 기능들 모두 Dialog를 통해 service를 제공하고 있습니다.
 
 <br></br>
 
 > ## 2-6-2. Update User Screen
 
-ㅁㅁㅁㅁㅁㅁㅁ
+(update User screen img)
+
+Update User Screen의 경우 SettingScreen.kt에 정의한 UpdateUserScreen composable에 의해 구성됩니다.
+
+해당 composable에서는 해당 유저의 이름과 소개말, 프로필 사진을 변경할 수 있는 기능을 제공합니다.
 
 <br></br>
 
 > ## 2-6-3. 버전 정보
 
-ㅁㅁㅁㅁㅁㅁ
+(dialog img)
+
+버전 정보의 경우 SettingScreen에서 remember, mutableStateOf를 이용해 UI상태를 관리하며 VersionInfoDialog composable을 이용해 Dialog창으로 UI를 구현하고 있습니다.
+
+해당 UI에서는 BuildConfig에서 VERSION_NAME을 이용해 버전 정보를 불러와 표시합니다.
 
 <br></br>
 
 > ## 2-6-4. 로그아웃, 회원 탈퇴
 
-ㅁㅁㅁㅁㅁㅁ
+(LogOutDialog, DeleteUerDialog 이미지 붙여서)
+
+로그아웃과 회원탈퇴 역시 remember, mutableStateOf를 이용해 UI상태를 관리하며 LogOutDialog, DeleteUserDialog를 이용해 Dialog창으로 UI를 구현하고 있습니다.
+
+위 사진에서 모두 '예'를 누르면 각 로그아웃과 회원탈퇴 settingViewModel에 정의된 logout, deleteUser method가 실현되게 됩니다.
+
+logout method의 경우 sharedPreferences에 의해 저장된 autoLogin을 위한 token이 삭제되며, spring과 연계하여 로그아웃 기능이 작동하게 됩니다.
+
+이에 대한 기술적 구현에 대한 내용은 항목 3-8. 안드로이드에서 JWT를 이용한 자동 로그인 및 로그아웃 구현을 참고 부탁드립니다.
+
+delete method의 경우 deleteUser method를 호출하여 retrofit2의 DELETE method를 이용해 spring과 연계하여 DB에 존재하는 회원 정보를 삭제하여 회원탈퇴 기능을 구현합니다. 
+
 
 <br></br>
 
@@ -404,7 +443,7 @@ image를 upload하거나 download하는 기능에 대한 기념이나 예시들�
 
 <br></br>
 
-> ## 3-8. 안드로이드에서 JWT를 이용한 자동 로그인 구현
+> ## 3-8. 안드로이드에서 JWT를 이용한 자동 로그인 및 로그아웃 구현
 
 ㅁㅁㅁㅁㅁㅁㅁ
 
