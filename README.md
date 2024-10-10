@@ -70,7 +70,7 @@
 
     3-6. 안드로이드 emulator에서 image 불러와서 Spring mobile app server를 이용해 DB에 저장하기 (image upload & download)
 
-    3-7. Debounce & Throttle을 이용한 검색 기능 및 검색어 자동완성 기능 구현
+    3-7. Debounce를 이용한 검색 기능 및 검색어 자동완성 기능 구현 (Debounce & Throttle)
 
     3-8. 안드로이드에서 JWT를 이용한 자동 로그인 및 로그아웃 구현 
 
@@ -434,9 +434,15 @@ image를 upload하거나 download하는 기능에 대한 기념이나 예시들�
 
 <br></br>
 
-> ## 3-7. Debounce & Throttle을 이용한 검색 기능 및 검색어 자동완성 기능 구현
+> ## 3-7. Debounce를 이용한 검색 기능 및 검색어 자동완성 기능 구현 (Debounce & Throttle)
 
-ㅁㅁㅁㅁㅁㅁ
+Secret Diary는 HomeScreen에서는 게시물 제목을 keyword로 자신이 작성한 게시물을 검색할 수 있는 기능을 제공하고 있고,
+
+FriendScreen에서의 Tab1, Tab2 역시 각 친구 검색과 유저 검색 기능을 제공하고 있습니다.
+
+이러한 기능에 대하여 Debounce를 이용하여 구현을 하였습니다.
+
+Debounce를 이용한 검색 기능 및 검색어 자동완성 기능 구현과 Throttle의 개념에 대해서는 제가 블로그에 직접 작성했던 [안드로이드에서 검색기능 및 검색어 자동완성 기능 구현하기 (Debounce & Throttle](https://pinlib.tistory.com/entry/debounceandthrottle)를 참고 부탁드립니다.
 
 <br></br>
 
