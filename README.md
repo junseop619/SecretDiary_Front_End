@@ -241,7 +241,8 @@ AddNoticeScreen에서와 마찬가지로 retrofit2를 이용한 Read의 구현�
 
 ## 2-5. Friend
 
-(Friend Screen img)
+<img width="350" alt="스크린샷 2024-10-15 오전 12 25 58" src="https://github.com/user-attachments/assets/6edfa84d-806a-4ab1-824c-0391be3aebb4">
+
 
 Friend Screen의 경우 FriendScreen coomposable입니다.
 
@@ -251,7 +252,7 @@ Friend Screen의 경우 FriendScreen coomposable입니다.
 
 > ## 2-5-1. Friend First Tab
 
-(친구 2명정도 있고, 특정 친구 검색 결과로 나오는 모습 image)
+<img width="350" alt="스크린샷 2024-10-15 오전 12 33 56" src="https://github.com/user-attachments/assets/355e17f2-b377-4d20-8134-ac41712b048a">
 
 FriendFirstTab composable로 구성한 해당 tab의 경우 위 사진과 동일한 화면으로 bottomNavigation에서 Friend tab일 때의 기본 UI입니다.
 
@@ -269,7 +270,7 @@ UserInfoSceen의 경우 항목 2-5-3. User Info Screen에서 더욱 자세하게
 
 > ## 2-5-2. Friend Second Tab
 
-(친구 요청 목록 1명 정도 있는 모습 image)
+<img width="336" alt="스크린샷 2024-10-15 오전 12 31 38" src="https://github.com/user-attachments/assets/838e7d57-0d15-4f35-805a-fb7702d44b2f">
 
 FriendSecondTab composable로 구성된 tab입니다.
 
@@ -293,11 +294,11 @@ UserInfoScreen composable로 구성되어 있는 User Info Screen의 경우 위 
 
 친구 관계 여부는 friendViewModel에 정의한 checkMyFriend method를 이용해 수행하게 됩니다.
 
-친구관계가 아닐 경우 해당 유저의 위 왼쪽 사진과 같이 해당 유저의 프로필과 친구 요청 버튼이 활성화되어있습니다. 해당 버튼을 누르게 되면, 해당 버튼이 비활성화 되며 상대방의 Friend Second tab의 친구 요청 목록에 해당 요청이 추가됩니다.
+친구관계가 아닐 경우 해당 유저의 위 왼쪽 사진과 같이 해당 유저의 프로필과 친구 요청 버튼이 활성화되어있습니다. 해당 버튼을 누르게 되면, 아래 사진과 같이 해당 버튼이 비활성화 되며 상대방의 Friend Second tab의 친구 요청 목록에 해당 요청이 추가됩니다.
 
-(버튼 비활성화 되어있는 사진)
+<img width="338" alt="스크린샷 2024-10-15 오전 12 27 53" src="https://github.com/user-attachments/assets/3166013c-7a4c-4ef0-ac53-cbe7e48b4dbe">
 
-만약 친구 관계일 경우 오른 위 오른쪽 사진과 같이 해당 유저의 프로필과 작성한 게시물이 LazyColumn형식으로 나오게 됩니다.
+만약 친구 관계일 경우 첫 번째 오른쪽 사진과 같이 해당 유저의 프로필과 작성한 게시물이 LazyColumn형식으로 나오게 됩니다.
 
 해당 게시물을 터치하게 되면 다음 항목에서 설명할 User Notice Detail Screen으로 전환되게 됩니다. 
 
@@ -315,7 +316,7 @@ User Notice Detail Screen의 경우 FriendScreen.kt에 정의한 UserNoticeDetai
 
 > ## 2-6-1. Settomg Screem
 
-(setting Screen img)
+<img width="342" alt="스크린샷 2024-10-15 오전 12 35 05" src="https://github.com/user-attachments/assets/5947b116-e73a-488c-ba2b-fc755a3038ac">
 
 Setting Sreen의 경우 SettingScreen.kt에 정의한 SettingScreen composable에 의해 구성됩니다.
 
@@ -333,7 +334,7 @@ Setting Screen에서 유저 정보가 나오는 원리는 Launched Effect를 이
 
 > ## 2-6-2. Update User Screen
 
-(update User screen img)
+<img width="339" alt="스크린샷 2024-10-15 오전 12 36 31" src="https://github.com/user-attachments/assets/28ad00d2-119a-416a-b682-e67a8b1ef846">
 
 Update User Screen의 경우 SettingScreen.kt에 정의한 UpdateUserScreen composable에 의해 구성됩니다.
 
@@ -343,7 +344,7 @@ Update User Screen의 경우 SettingScreen.kt에 정의한 UpdateUserScreen comp
 
 > ## 2-6-3. 버전 정보
 
-(dialog img)
+<img width="329" alt="스크린샷 2024-10-15 오전 12 37 29" src="https://github.com/user-attachments/assets/f1797fdb-1367-49a5-ba36-51aec3081f72">
 
 버전 정보의 경우 SettingScreen에서 remember, mutableStateOf를 이용해 UI상태를 관리하며 VersionInfoDialog composable을 이용해 Dialog창으로 UI를 구현하고 있습니다.
 
