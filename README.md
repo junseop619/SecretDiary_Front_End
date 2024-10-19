@@ -141,7 +141,7 @@ SDScreen.kt에 정의한 MyBottomNavigation의 경우 역시, route값에 대한
 
 이러한 topBar와 bottomBar를 장착한 composable은 SDScreen으로 위에서 언급한 조건들은 SDScreen composable function에 정의되어 있습니다.
 
-*자동 로그인에 대한 내용은 항목 3-8을 참조 부탁드립니다.
+* 자동 로그인에 대한 내용은 항목 3-8을 참조 부탁드립니다.
 
 <br></br>
 
@@ -197,9 +197,9 @@ HomeScreen composable에는 상단바에 + 모양의 Icon을 눌러 AddNoticeScr
 
 해당 keyword와 유사한 notice를 LazyColumn에 결과로 제공합니다.
 
-* retrofit2를 이용한 게시물 읽어오기 기능에 관해서는 항목 --의 --을 참조 부탁드립니다.
+* retrofit2를 이용한 게시물 읽어오기 기능에 관해서는 항목 3-5를 참조 부탁드립니다.
 
-* 검색기능 및 검색어 자동완성에 대해서는 항목 --의 --을 참조 부탁드립니다.
+* 검색기능 및 검색어 자동완성에 대해서는 항목 3-7을 참조 부탁드립니다.
 
 게시물 검색기능 아래로는 LazyColumn을 통해 게시물을 RecyclerView형식으로 자신이 작성한 게시물을 표시하게 됩니다.
 
@@ -219,9 +219,9 @@ Add Notice Screen의 경우 AddNoticeScreen composable로 구현하였습니다.
 
 이후, 작성하기를 누르게 되면 retrofit2를 이용해 게시물이 Create되며 Spring을 이용하여 해당 게시물이 작성 시간과 함께 DB에 저장됩니다.
 
-* retrofit2를 이용한 Spring과 통신하여 CRUD를 구현하는 방법에 대해서는 ~ 를 참고 부탁드립니다.
+* retrofit2를 이용한 Spring과 통신하여 CRUD를 구현하는 방법에 대해서는 항목 3-5를 참고 부탁드립니다.
 
-* android emulator에서 Image를 가져와 Spring을 이용해 DB에 저장하는 방법에 대해서는 ~ 를 참고 부탁드립니다.
+* android emulator에서 Image를 가져와 Spring을 이용해 DB에 저장하는 방법에 대해서는 항목 3-6을 참고 부탁드립니다.
 
 <br></br>
 
@@ -449,7 +449,11 @@ Debounce를 이용한 검색 기능 및 검색어 자동완성 기능 구현과 
 
 > ## 3-8. 안드로이드에서 JWT를 이용한 자동 로그인 및 로그아웃 구현
 
-ㅁㅁㅁㅁㅁㅁㅁ
+Secret Diary는 Spring Security와 JWT를 이용하여 보안처리를 하고 있습니다. 
+
+Spring에서 Spring Security와 JWT를 적용하는 방법의 경우 저의 깃허브인 [Secret_Diary_Back_End_Github](https://github.com/junseop619/Secret_Diary_Back_End) 해당 프로젝트의 readme를 참조 부탁드립니다.
+
+이러한 Spring Security와 JWT를 이용하여 Android에서 로그인, 자동 로그인, 로그아웃 기능 구현에 대하여는 제가 블로그에 직접 작성했던 [Android에서 Spring Security를 이용한 자동 로그인 구현](https://pinlib.tistory.com/entry/androidAutoLogin) 를 참고 부탁드립니다.
 
 <br></br>
  
